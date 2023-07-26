@@ -181,7 +181,7 @@ public class RESVideoClient {
         }
     }
 
-    public boolean startStreaming(RESFlvDataCollecter flvDataCollecter) {
+    public boolean startStreaming(RESFlvDataCollecter flvDataCollector) {
         synchronized (syncOp) {
             if (!isStreaming && !isPreviewing) {
                 if (!startVideo()) {
@@ -191,7 +191,7 @@ public class RESVideoClient {
                 }
                 videoCore.updateCamTexture(camTexture);
             }
-            videoCore.startStreaming(flvDataCollecter);
+            videoCore.startStreaming(flvDataCollector);
             isStreaming = true;
             return true;
         }

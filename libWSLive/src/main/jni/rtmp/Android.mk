@@ -12,6 +12,11 @@ LOCAL_C_INCLUDES += log.h
 
 LOCAL_CFLAGS += -DNO_CRYPTO
 
+LOCAL_CFLAGS += -Wno-pointer-sign \
+	-Wno-incompatible-pointer-types \
+	-Wno-implicit-function-declaration \
+	-Wno-int-conversion
+
 LOCAL_MODULE := libresrtmp
 
 

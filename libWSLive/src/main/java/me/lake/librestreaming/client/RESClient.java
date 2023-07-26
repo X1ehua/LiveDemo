@@ -103,13 +103,12 @@ public class RESClient {
                 rtmpSender.start(rtmpAddr == null ? coreParameters.rtmpAddr : rtmpAddr);
                 audioClient.start(dataCollecter);
                 LogTools.d("RESClient,startStreaming()");
-            }catch (Exception e){
-                if(mActivity.get() !=null){
-                    Toast.makeText(mActivity.get(),"可能没有权限",Toast.LENGTH_LONG).show();
+            } catch (Exception e) {
+                if (mActivity.get() != null) {
+                    Toast.makeText(mActivity.get(), "可能没有权限", Toast.LENGTH_LONG).show();
                     mActivity.get().finish();
                 }
             }
-
         }
     }
 

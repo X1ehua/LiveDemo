@@ -919,7 +919,7 @@ void setNoBlock(int sb_socket,int enbale){
     		return;
     	}
     }else{
-        flags;
+        // flags;
         if((flags = fcntl(sb_socket, F_GETFL)) < 0){
             printf("F_GETFL error!\n");
         }
@@ -958,7 +958,8 @@ RTMP_Connect0(RTMP *r, struct sockaddr * service)
     		    return FALSE;
     		}else{
     			int error=0;
-    			getsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_ERROR, &error, sizeof(int));
+          int optlen = sizeof(int);
+    			getsockopt(r->m_sb.sb_socket, SOL_SOCKET, SO_ERROR, &error, &optlen);
     			if(error!=0){
     			    LOGD("connect failed=%d!",error);
     				return FALSE;

@@ -253,10 +253,10 @@ public class RESHardVideoCore implements RESVideoCore {
     }
 
 
-    public void setMirror(boolean isEnableMirror,boolean isEnablePreviewMirror,boolean isEnableStreamMirror) {
-            this.isEnableMirror = isEnableMirror;
-            this.isEnablePreviewMirror = isEnablePreviewMirror;
-            this.isEnableStreamMirror = isEnableStreamMirror;
+    public void setMirror(boolean isEnableMirror, boolean isEnablePreviewMirror, boolean isEnableStreamMirror) {
+        this.isEnableMirror = isEnableMirror;
+        this.isEnablePreviewMirror = isEnablePreviewMirror;
+        this.isEnableStreamMirror = isEnableStreamMirror;
     }
 
     @Override
@@ -345,7 +345,7 @@ public class RESHardVideoCore implements RESVideoCore {
                                         hasNewFrame = true;
                                     } else {
                                         dropNextFrame = false;
-                                        hasNewFrame=false;
+                                        hasNewFrame = false;
                                     }
                                 }
                             } else {
@@ -468,7 +468,7 @@ public class RESHardVideoCore implements RESVideoCore {
                         videoSenderThread.updateMediaCodec(dstVideoEncoder);
                     }
                     synchronized (syncResVideoChangeListener) {
-                        if(resVideoChangeListener!=null) {
+                        if (resVideoChangeListener != null) {
                             CallbackDelivery.i().post(new RESVideoChangeListener.RESVideoChangeRunable(resVideoChangeListener,
                                     resCoreParameters.videoWidth,
                                     resCoreParameters.videoHeight));
@@ -482,7 +482,7 @@ public class RESHardVideoCore implements RESVideoCore {
 
 
         private void drawSample2DFrameBuffer(SurfaceTexture cameraTexture) {
-            if(isEnableMirror){
+            if (isEnableMirror) {
                 screenTextureVerticesBuffer = GLHelper.adjustTextureFlip(isEnablePreviewMirror);
                 mediaCodecTextureVerticesBuffer = GLHelper.adjustTextureFlip(isEnableStreamMirror);
             }
@@ -503,8 +503,12 @@ public class RESHardVideoCore implements RESVideoCore {
 
             //encoder mp4 end
             GLES20.glUniformMatrix4fv(offScreenGLWapper.cam2dTextureMatrix, 1, false, textureMatrix, 0);
-            GLES20.glViewport(0, 0, resCoreParameters.previewVideoHeight, resCoreParameters.previewVideoWidth);//resCoreParameters.videoWidth, resCoreParameters.videoHeight
+
+            //resCoreParameters.videoWidth, resCoreParameters.videoHeight
+            GLES20.glViewport(0, 0, resCoreParameters.previewVideoHeight, resCoreParameters.previewVideoWidth);
+
             doGLDraw();
+
             GLES20.glFinish();
             GLHelper.disableVertex(offScreenGLWapper.cam2dPostionLoc, offScreenGLWapper.cam2dTextureCoordLoc);
             GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
@@ -557,7 +561,7 @@ public class RESHardVideoCore implements RESVideoCore {
             } else {
                 drawOriginFrameBuffer();
             }
-            LogTools.e("滤镜耗时："+(System.currentTimeMillis()-starttime));
+            LogTools.e("滤镜耗时：" + (System.currentTimeMillis() - starttime));
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, frameBuffer);
             checkScreenShot();
             GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, 0);
@@ -642,10 +646,10 @@ public class RESHardVideoCore implements RESVideoCore {
                                 resCoreParameters.previewVideoWidth,
                                 Bitmap.Config.ARGB_8888);
 
-                        if(isEnableMirror && isEnablePreviewMirror){
+                        if (isEnableMirror && isEnablePreviewMirror) {
                             Matrix mx = new Matrix();
                             mx.setScale(-1, 1);  //产生镜像
-                            result =   Bitmap.createBitmap(result,0,0,result.getWidth(),result.getHeight(),mx,true);
+                            result = Bitmap.createBitmap(result, 0, 0, result.getWidth(), result.getHeight(), mx, true);
                         }
                     } catch (Exception e) {
                         LogTools.trace("takescreenshot failed:", e);
@@ -828,7 +832,7 @@ public class RESHardVideoCore implements RESVideoCore {
             screenSize = new Size(w, h);
         }
 
-        public int getBufferTexture(){
+        public int getBufferTexture() {
             return frameBufferTexture;
         }
 
@@ -854,12 +858,12 @@ public class RESHardVideoCore implements RESVideoCore {
     private int mCameraId = -1;
 
     public void setVideoEncoder(final MediaVideoEncoder encoder) {
-                synchronized (this) {
-                    if (encoder != null) {
-                        encoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
-                    }
-                    mVideoEncoder = encoder;
-                }
+        synchronized (this) {
+            if (encoder != null) {
+                encoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
+            }
+            mVideoEncoder = encoder;
+        }
     }
 
     private void processStMatrix(float[] matrix, boolean needMirror) {
@@ -878,7 +882,7 @@ public class RESHardVideoCore implements RESVideoCore {
         return;
     }
 
-    public void setNeedResetEglContext(boolean bol){
+    public void setNeedResetEglContext(boolean bol) {
         mNeedResetEglContext = bol;
     }
     //encoder mp4 end
