@@ -2,12 +2,13 @@ package me.lake.librestreaming.ws.filter.hardfilter;
 
 import android.opengl.GLES20;
 
-import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
+//import jp.co.cyberagent.android.gpuimage.GPUImageFilter;
 
 /**
  * @author WangShuo
  */
 public class GPUImageBeautyFilter extends GPUImageFilter {
+//public class GPUImageBeautyFilter {
     public static final String BILATERAL_FRAGMENT_SHADER = "" +
             "precision highp float;\n"+
             "   varying highp vec2 textureCoordinate;\n" +

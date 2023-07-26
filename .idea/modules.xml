@@ -2,9 +2,15 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WSLiveDemo.iml" filepath="$PROJECT_DIR$/WSLiveDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libWSLive/libWSLive.iml" filepath="$PROJECT_DIR$/libWSLive/libWSLive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/LiveDemo.iml" filepath="$PROJECT_DIR$/.idea/modules/LiveDemo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/LiveDemo.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.iml" filepath="$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.main.iml" filepath="$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/libWSLive/LiveDemo.libWSLive.unitTest.iml" />
     </modules>
   </component>
 </project>

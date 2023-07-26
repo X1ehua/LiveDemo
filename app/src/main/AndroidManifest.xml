@@ -21,6 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".LiveActivity"
+                  android:exported="true"
                   android:configChanges="orientation|keyboardHidden|navigation|screenSize"
                   android:screenOrientation="portrait">
             <intent-filter>
