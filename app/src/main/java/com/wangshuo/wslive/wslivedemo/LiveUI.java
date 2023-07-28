@@ -44,6 +44,7 @@ public class LiveUI implements View.OnClickListener {
         this.rtmpUrl = rtmpUrl;
 
         init();
+        liveCameraView.swapCamera();
     }
 
     private void init() {
