@@ -1,12 +1,18 @@
 package com.wangshuo.wslive.wslivedemo;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.LinkedList;
+import java.util.Set;
 
 import me.lake.librestreaming.core.listener.RESConnectionListener;
 import me.lake.librestreaming.filter.hardvideofilter.BaseHardVideoFilter;
@@ -36,7 +42,7 @@ public class LiveActivity extends AppCompatActivity {
         StatusBarUtils.setTranslucentStatus(this);
 
         initLiveConfig();
-        mLiveUI = new LiveUI(this,mLiveCameraView,rtmpUrl);
+        mLiveUI = new LiveUI(this, mLiveCameraView, rtmpUrl);
     }
 
     /**
@@ -54,7 +60,11 @@ public class LiveActivity extends AppCompatActivity {
         mLiveCameraView.addStreamStateListener(resConnectionListener);
         LinkedList<BaseHardVideoFilter> files = new LinkedList<>();
         files.add(new GPUImageCompatibleFilter(new GPUImageBeautyFilter()));
-        files.add(new WatermarkFilter(BitmapFactory.decodeResource(getResources(),R.mipmap.live),new Rect(100,100,200,200)));
+
+        //Rect rect = new Rect(100, 100, 200, 200);
+        //Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.live);
+        //files.add(new WatermarkFilter(bitmap, rect));
+
         mLiveCameraView.setHardVideoFilter(new HardVideoGroupFilter(files));
     }
 
@@ -62,18 +72,18 @@ public class LiveActivity extends AppCompatActivity {
         @Override
         public void onOpenConnectionResult(int result) {
             //result 0成功  1 失败
-            Toast.makeText(LiveActivity.this,"打开推流连接 状态："+result+ " 推流地址："+rtmpUrl,Toast.LENGTH_LONG).show();
+            Toast.makeText(LiveActivity.this, "打开推流连接 状态：" + result + " 推流地址：" + rtmpUrl, Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onWriteError(int errno) {
-            Toast.makeText(LiveActivity.this,"推流出错,请尝试重连",Toast.LENGTH_LONG).show();
+            Toast.makeText(LiveActivity.this, "推流出错,请尝试重连", Toast.LENGTH_LONG).show();
         }
 
         @Override
         public void onCloseConnectionResult(int result) {
             //result 0成功  1 失败
-            Toast.makeText(LiveActivity.this,"关闭推流连接 状态："+result,Toast.LENGTH_LONG).show();
+            Toast.makeText(LiveActivity.this, "关闭推流连接 状态：" + result, Toast.LENGTH_LONG).show();
         }
     };
 

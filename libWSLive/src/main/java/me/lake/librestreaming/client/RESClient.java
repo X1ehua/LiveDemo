@@ -56,14 +56,14 @@ public class RESClient {
      * @param resConfig config
      * @return true if prepare success
      */
-    public boolean prepare(RESConfig resConfig) {
+    public boolean prepare(Context context, RESConfig resConfig) {
         synchronized (SyncOp) {
             checkDirection(resConfig);
             coreParameters.filterMode = resConfig.getFilterMode();
             coreParameters.rtmpAddr = resConfig.getRtmpAddr();
             coreParameters.printDetailMsg = resConfig.isPrintDetailMsg();
             coreParameters.senderQueueLength = 200;//150
-            videoClient = new RESVideoClient(coreParameters);
+            videoClient = new RESVideoClient(context, coreParameters);
             audioClient = new RESAudioClient(coreParameters);
             if (!videoClient.prepare(resConfig)) {
                 LogTools.d("!!!!!videoClient.prepare()failed");

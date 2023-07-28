@@ -1,10 +1,22 @@
 package me.lake.librestreaming.client;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraDevice;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.CameraMetadata;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import me.lake.librestreaming.core.CameraHelper;
 import me.lake.librestreaming.core.RESHardVideoCore;
@@ -25,21 +37,64 @@ import me.lake.librestreaming.tools.LogTools;
 
 public class RESVideoClient {
     RESCoreParameters resCoreParameters;
+    private final static String TAG = "CCLive";
     private final Object syncOp = new Object();
     private Camera camera;
+    private CameraDevice camera2;
     public SurfaceTexture camTexture;
     private int cameraNum;
     private int currentCameraIndex;
     private RESVideoCore videoCore;
     private boolean isStreaming;
     private boolean isPreviewing;
+    private Context context;
 
-    public RESVideoClient(RESCoreParameters parameters) {
+    public RESVideoClient(Context context, RESCoreParameters parameters) {
+        this.context = context;
         resCoreParameters = parameters;
         cameraNum = Camera.getNumberOfCameras();
         currentCameraIndex = Camera.CameraInfo.CAMERA_FACING_BACK;
         isStreaming = false;
         isPreviewing = false;
+        //initCameraIds();
+    }
+
+    public void initCameraIds() {
+        CameraManager manager = (CameraManager) context.getSystemService(android.content.Context.CAMERA_SERVICE);
+        boolean isFirstDefault = true;
+        String[] cameraIdList = null;
+        try {
+            cameraIdList = manager.getCameraIdList();
+        } catch (Exception e) {
+            //e.printStackTrace();
+            Log.e(TAG, e.toString());
+        }
+
+        this.cameraNum = cameraIdList.length;
+
+        if (cameraIdList == null || cameraIdList.length == 0) {
+            return;
+        }
+        for (int i = 0; i < cameraIdList.length; i++) {
+            String cameraId = cameraIdList[i];
+            CameraCharacteristics characteristics;
+            try {
+                characteristics = manager.getCameraCharacteristics(cameraId);
+            } catch (Exception e) {
+                //e.printStackTrace();
+                Log.e(TAG, e.toString());
+                continue;
+            }
+            int c1 = CameraMetadata.REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA; // 11
+            // vivo v2130: 0 1 2 5 3 6 9
+            // HUAWEI P30: 0 2 9 11 8 [HarmonyOS 2.0]
+            int[] ret = characteristics.get(CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES);
+            Set<String> physicalCameraIds = characteristics.getPhysicalCameraIds();
+            for (String camId : physicalCameraIds) {
+                Log.v(TAG, "initCameraIds physicalCameraIds :" + physicalCameraIds);
+                Log.v(TAG, "initCameraIds >>>> camId :" + camId + " cameraId :" + cameraId + ", i :" + i);
+            }
+        }
     }
 
     public boolean prepare(RESConfig resConfig) {
@@ -87,6 +142,48 @@ public class RESVideoClient {
         }
     }
 
+    /*
+    @SuppressLint("MissingPermission")
+    private void createCamera(final int cameraId) {
+        CameraManager manager = (CameraManager) context.getSystemService(android.content.Context.CAMERA_SERVICE);
+        try {
+
+            String[] cameraIds = manager.getCameraIdList();
+            if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    Activity#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for Activity#requestPermissions for more details.
+                return TODO;
+            }
+            manager.openCamera(cameraIds[cameraId], new CameraDevice.StateCallback() {
+                @Override
+                public void onOpened(CameraDevice camera) {
+                    RESVideoClient.this.camera = camera;
+                }
+
+                @Override
+                public void onDisconnected(CameraDevice camera) {
+                    RESVideoClient.this.camera = camera;
+                    // TODO handle
+                }
+
+                @Override
+                public void onError(CameraDevice camera, int error) {
+                    RESVideoClient.this.camera = camera;
+                    // TODO handle
+                }
+            }, null);
+        } catch (Exception e) {
+            // TODO handle
+            Log.e(TAG, e.toString());
+        }
+    }
+    */
+
     private Camera createCamera(int cameraId) {
         try {
             camera = Camera.open(cameraId);
@@ -111,6 +208,11 @@ public class RESVideoClient {
 
     private boolean startVideo() {
         camTexture = new SurfaceTexture(RESVideoCore.OVERWATCH_TEXTURE_ID);
+        if (resCoreParameters.filterMode != RESCoreParameters.FILTER_MODE_HARD) {
+            Log.e(TAG, "FILTER_MODE_SOFT not supported!");
+            return false;
+        }
+        /*
         if (resCoreParameters.filterMode == RESCoreParameters.FILTER_MODE_SOFT) {
             camera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                 @Override
@@ -124,17 +226,18 @@ public class RESVideoClient {
                 }
             });
         } else {
-            camTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
-                @Override
-                public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-                    synchronized (syncOp) {
-                        if (videoCore != null) {
-                            ((RESHardVideoCore) videoCore).onFrameAvailable();
-                        }
+        */
+        camTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+            @Override
+            public void onFrameAvailable(SurfaceTexture surfaceTexture) {
+                synchronized (syncOp) {
+                    if (videoCore != null) {
+                        ((RESHardVideoCore) videoCore).onFrameAvailable();
                     }
                 }
-            });
-        }
+            }
+        });
+
         try {
             camera.setPreviewTexture(camTexture);
         } catch (IOException e) {
@@ -244,6 +347,8 @@ public class RESVideoClient {
             videoCore.updateCamTexture(null);
             startVideo();
             videoCore.updateCamTexture(camTexture);
+            String text = "Camera Id changed to " + currentCameraIndex;
+            Toast.makeText(context.getApplicationContext(), text, Toast.LENGTH_LONG).show();
             return true;
         }
     }
@@ -279,7 +384,10 @@ public class RESVideoClient {
         synchronized (syncOp) {
             targetPercent = Math.min(Math.max(0f, targetPercent), 1f);
             Camera.Parameters p = camera.getParameters();
-            p.setZoom((int) (p.getMaxZoom() * targetPercent));
+            int maxZoom = p.getMaxZoom();
+            List<Integer> list = p.getZoomRatios();
+            //p.setZoom((int) (maxZoom * targetPercent));
+            p.setZoom(0);
             camera.setParameters(p);
             return true;
         }
