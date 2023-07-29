@@ -20,20 +20,16 @@ import me.lake.librestreaming.filter.hardvideofilter.HardVideoGroupFilter;
 import me.lake.librestreaming.ws.StreamAVOption;
 import me.lake.librestreaming.ws.StreamLiveCameraView;
 import me.lake.librestreaming.ws.filter.hardfilter.GPUImageBeautyFilter;
+import me.lake.librestreaming.ws.filter.hardfilter.GPUImageFilter;
 import me.lake.librestreaming.ws.filter.hardfilter.WatermarkFilter;
 import me.lake.librestreaming.ws.filter.hardfilter.extra.GPUImageCompatibleFilter;
 
 public class LiveActivity extends AppCompatActivity {
-    private static final String TAG = LiveActivity.class.getSimpleName();
+    private final static String  TAG = "CCLive";
+    private final static String  mRtmpUrl = "rtmp://mozicode.com:1935/wstv/home";
     private StreamLiveCameraView mLiveCameraView;
-    private StreamAVOption streamAVOption;
-    /*
-    private String rtmpUrl = "rtmp://ossrs.net/" + StatusBarUtils.getRandomAlphaString(3)
-                             + '/' + StatusBarUtils.getRandomAlphaDigitString(5);
-    */
-    private String rtmpUrl = "rtmp://mozicode.com:1935/wstv/home";
-
-    private LiveUI mLiveUI;
+    private StreamAVOption       mStreamAVOption;
+    private LiveUI               mLiveUI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,48 +38,44 @@ public class LiveActivity extends AppCompatActivity {
         StatusBarUtils.setTranslucentStatus(this);
 
         initLiveConfig();
-        mLiveUI = new LiveUI(this, mLiveCameraView, rtmpUrl);
+        mLiveUI = new LiveUI(this, mLiveCameraView, mRtmpUrl);
     }
 
-    /**
-     * 设置推流参数
-     */
     public void initLiveConfig() {
-        mLiveCameraView = (StreamLiveCameraView) findViewById(R.id.stream_previewView);
+        mStreamAVOption = new StreamAVOption(mRtmpUrl);
 
-        //参数配置 start
-        streamAVOption = new StreamAVOption();
-        streamAVOption.streamUrl = rtmpUrl;
-        //参数配置 end
+        mLiveCameraView = (StreamLiveCameraView)findViewById(R.id.stream_previewView);
+        mLiveCameraView.init(this, mStreamAVOption);
+        mLiveCameraView.addStreamStateListener(mConnectionListener);
 
-        mLiveCameraView.init(this, streamAVOption);
-        mLiveCameraView.addStreamStateListener(resConnectionListener);
-        LinkedList<BaseHardVideoFilter> files = new LinkedList<>();
-        files.add(new GPUImageCompatibleFilter(new GPUImageBeautyFilter()));
+        LinkedList<BaseHardVideoFilter> filters = new LinkedList<>();
+        //files.add(new GPUImageCompatibleFilter(new GPUImageBeautyFilter()));
+        filters.add(new GPUImageCompatibleFilter(new GPUImageFilter()));
 
-        //Rect rect = new Rect(100, 100, 200, 200);
-        //Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.live);
-        //files.add(new WatermarkFilter(bitmap, rect));
-
-        mLiveCameraView.setHardVideoFilter(new HardVideoGroupFilter(files));
+        /*
+        Rect rect = new Rect(100, 100, 200, 200);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.live);
+        files.add(new WatermarkFilter(bitmap, rect));
+        */
+        mLiveCameraView.setHardVideoFilter(new HardVideoGroupFilter(filters));
     }
 
-    RESConnectionListener resConnectionListener = new RESConnectionListener() {
+    RESConnectionListener mConnectionListener = new RESConnectionListener() {
         @Override
-        public void onOpenConnectionResult(int result) {
-            //result 0成功  1 失败
-            Toast.makeText(LiveActivity.this, "打开推流连接 状态：" + result + " 推流地址：" + rtmpUrl, Toast.LENGTH_LONG).show();
+        public void onOpenConnectionResult(int result) { // 0: success, 1: failed
+            String msg = result == 0 ? "Streaming started" : "Start streaming failed";
+            Toast.makeText(LiveActivity.this, msg, Toast.LENGTH_LONG).show();
         }
 
         @Override
-        public void onWriteError(int errno) {
-            Toast.makeText(LiveActivity.this, "推流出错,请尝试重连", Toast.LENGTH_LONG).show();
+        public void onWriteError(int err) {
+            Toast.makeText(LiveActivity.this, "onWriteError: " + err, Toast.LENGTH_LONG).show();
         }
 
         @Override
-        public void onCloseConnectionResult(int result) {
-            //result 0成功  1 失败
-            Toast.makeText(LiveActivity.this, "关闭推流连接 状态：" + result, Toast.LENGTH_LONG).show();
+        public void onCloseConnectionResult(int result) { // 0: success, 1: failed
+            String ret = result == 0 ? "success" : "failed";
+            Toast.makeText(LiveActivity.this, "onCloseConnection: " + ret, Toast.LENGTH_LONG).show();
         }
     };
 

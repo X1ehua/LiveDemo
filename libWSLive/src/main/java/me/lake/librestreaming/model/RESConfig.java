@@ -1,11 +1,8 @@
 package me.lake.librestreaming.model;
 
-
 import android.hardware.Camera;
 
-
 public class RESConfig {
-
     public static class FilterMode {
         public static final int HARD = RESCoreParameters.FILTER_MODE_HARD;
         public static final int SOFT = RESCoreParameters.FILTER_MODE_SOFT;
@@ -18,7 +15,7 @@ public class RESConfig {
 
     public static class DirectionMode {
         public static final int FLAG_DIRECTION_FLIP_HORIZONTAL = RESCoreParameters.FLAG_DIRECTION_FLIP_HORIZONTAL;
-        public static final int FLAG_DIRECTION_FLIP_VERTICAL = RESCoreParameters.FLAG_DIRECTION_FLIP_VERTICAL;
+        //  public static final int FLAG_DIRECTION_FLIP_VERTICAL = RESCoreParameters.FLAG_DIRECTION_FLIP_VERTICAL;
         public static final int FLAG_DIRECTION_ROATATION_0 = RESCoreParameters.FLAG_DIRECTION_ROATATION_0;
         public static final int FLAG_DIRECTION_ROATATION_90 = RESCoreParameters.FLAG_DIRECTION_ROATATION_90;
         public static final int FLAG_DIRECTION_ROATATION_180 = RESCoreParameters.FLAG_DIRECTION_ROATATION_180;
@@ -26,10 +23,8 @@ public class RESConfig {
     }
 
     private int filterMode;
-    private Size targetVideoSize;
     private int videoBufferQueueNum;
     private int bitRate;
-    private String rtmpAddr;
     private int renderingMode;
     private int defaultCamera;
     private int frontCameraDirectionMode;
@@ -37,7 +32,9 @@ public class RESConfig {
     private int videoFPS;
     private int videoGOP;
     private boolean printDetailMsg;
+    private Size targetVideoSize;
     private Size targetPreviewSize;
+    private String rtmpAddr;
 
     private RESConfig() {
     }
@@ -58,12 +55,10 @@ public class RESConfig {
         return res;
     }
 
-        /**
-         * set the filter mode.
-         *
-         * @param filterMode {@link FilterMode}
-         */
-
+    /**
+     * set the filter mode.
+     * @param filterMode {@link FilterMode}
+     */
     public void setFilterMode(int filterMode) {
         this.filterMode = filterMode;
     }
@@ -77,7 +72,6 @@ public class RESConfig {
 
     /**
      * set front camera rotation & flip
-     *
      * @param frontCameraDirectionMode {@link DirectionMode}
      */
     public void setFrontCameraDirectionMode(int frontCameraDirectionMode) {
@@ -86,7 +80,6 @@ public class RESConfig {
 
     /**
      * set front camera rotation & flip
-     *
      * @param backCameraDirectionMode {@link DirectionMode}
      */
     public void setBackCameraDirectionMode(int backCameraDirectionMode) {
@@ -96,7 +89,6 @@ public class RESConfig {
     /**
      * set  renderingMode when using soft mode<br/>
      * no use for hard mode
-     *
      * @param renderingMode {@link RenderingMode}
      */
     public void setRenderingMode(int renderingMode) {
@@ -105,7 +97,6 @@ public class RESConfig {
 
     /**
      * no use for now
-     *
      * @param printDetailMsg
      */
     public void setPrintDetailMsg(boolean printDetailMsg) {
@@ -125,7 +116,6 @@ public class RESConfig {
     /**
      * set video buffer number for soft mode.<br/>
      * num larger:video Smoother,more memory.
-     *
      * @param num
      */
     public void setVideoBufferQueueNum(int num) {
@@ -134,7 +124,6 @@ public class RESConfig {
 
     /**
      * set video bitrate
-     *
      * @param bitRate
      */
     public void setBitRate(int bitRate) {
@@ -149,11 +138,11 @@ public class RESConfig {
         this.videoFPS = videoFPS;
     }
 
-    public int getVideoGOP(){
+    public int getVideoGOP() {
         return videoGOP;
     }
 
-    public void setVideoGOP(int videoGOP){
+    public void setVideoGOP(int videoGOP) {
         this.videoGOP = videoGOP;
     }
 

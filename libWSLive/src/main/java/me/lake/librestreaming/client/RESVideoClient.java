@@ -397,10 +397,10 @@ public class RESVideoClient {
         }
     }
 
-    public void reSetVideoBitrate(int bitrate) {
+    public void setVideoBitRate(int bitrate) {
         synchronized (syncOp) {
             if (videoCore != null) {
-                videoCore.reSetVideoBitrate(bitrate);
+                videoCore.setVideoBitRate(bitrate);
             }
         }
     }
@@ -415,7 +415,7 @@ public class RESVideoClient {
         }
     }
 
-    public void reSetVideoFPS(int fps) {
+    public void setVideoFPS(int fps) {
         synchronized (syncOp) {
             int targetFps;
             if (fps > resCoreParameters.previewMaxFps / 1000) {
@@ -424,7 +424,7 @@ public class RESVideoClient {
                 targetFps = fps;
             }
             if (videoCore != null) {
-                videoCore.reSetVideoFPS(targetFps);
+                videoCore.setVideoFPS(targetFps);
             }
         }
     }

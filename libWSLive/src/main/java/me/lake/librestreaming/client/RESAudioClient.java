@@ -1,5 +1,6 @@
 package me.lake.librestreaming.client;
 
+import android.annotation.SuppressLint;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
@@ -32,12 +33,12 @@ public class RESAudioClient {
                 LogTools.e("RESAudioClient,prepare");
                 return false;
             }
-            resCoreParameters.audioRecoderFormat = AudioFormat.ENCODING_PCM_16BIT;
-            resCoreParameters.audioRecoderChannelConfig = AudioFormat.CHANNEL_IN_MONO;
-            resCoreParameters.audioRecoderSliceSize = resCoreParameters.mediacodecAACSampleRate / 10;
-            resCoreParameters.audioRecoderBufferSize = resCoreParameters.audioRecoderSliceSize * 2;
-            resCoreParameters.audioRecoderSource = MediaRecorder.AudioSource.DEFAULT;
-            resCoreParameters.audioRecoderSampleRate = resCoreParameters.mediacodecAACSampleRate;
+            resCoreParameters.audioEncodeFormat = AudioFormat.ENCODING_PCM_16BIT;
+            resCoreParameters.audioEncodeChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+            resCoreParameters.audioEncodeSliceSize = resCoreParameters.mediaCodecAACSampleRate / 10;
+            resCoreParameters.audioEncodeBufferSize = resCoreParameters.audioEncodeSliceSize * 2;
+            resCoreParameters.audioEncodeSource = MediaRecorder.AudioSource.DEFAULT;
+            resCoreParameters.audioEncodeSampleRate = resCoreParameters.mediaCodecAACSampleRate;
             prepareAudio();
             return true;
         }
@@ -88,22 +89,23 @@ public class RESAudioClient {
         softAudioCore.releaseAudioFilter();
     }
 
+    @SuppressLint("MissingPermission")
     private boolean prepareAudio() {
-        int minBufferSize = AudioRecord.getMinBufferSize(resCoreParameters.audioRecoderSampleRate,
-                resCoreParameters.audioRecoderChannelConfig,
-                resCoreParameters.audioRecoderFormat);
-        audioRecord = new AudioRecord(resCoreParameters.audioRecoderSource,
-                resCoreParameters.audioRecoderSampleRate,
-                resCoreParameters.audioRecoderChannelConfig,
-                resCoreParameters.audioRecoderFormat,
+        int minBufferSize = AudioRecord.getMinBufferSize(resCoreParameters.audioEncodeSampleRate,
+                resCoreParameters.audioEncodeChannelConfig,
+                resCoreParameters.audioEncodeFormat);
+        audioRecord = new AudioRecord(resCoreParameters.audioEncodeSource,
+                resCoreParameters.audioEncodeSampleRate,
+                resCoreParameters.audioEncodeChannelConfig,
+                resCoreParameters.audioEncodeFormat,
                 minBufferSize * 5);
-        audioBuffer = new byte[resCoreParameters.audioRecoderBufferSize];
+        audioBuffer = new byte[resCoreParameters.audioEncodeBufferSize];
         if (AudioRecord.STATE_INITIALIZED != audioRecord.getState()) {
             LogTools.e("audioRecord.getState()!=AudioRecord.STATE_INITIALIZED!");
             return false;
         }
-        if (AudioRecord.SUCCESS != audioRecord.setPositionNotificationPeriod(resCoreParameters.audioRecoderSliceSize)) {
-            LogTools.e("AudioRecord.SUCCESS != audioRecord.setPositionNotificationPeriod(" + resCoreParameters.audioRecoderSliceSize + ")");
+        if (AudioRecord.SUCCESS != audioRecord.setPositionNotificationPeriod(resCoreParameters.audioEncodeSliceSize)) {
+            LogTools.e("AudioRecord.SUCCESS != audioRecord.setPositionNotificationPeriod(" + resCoreParameters.audioEncodeSliceSize + ")");
             return false;
         }
         return true;

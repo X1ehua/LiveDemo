@@ -10,19 +10,19 @@ public class BaseHardVideoFilter {
     protected int SIZE_WIDTH;
     protected int SIZE_HEIGHT;
     protected int directionFlag=-1;
-    protected ShortBuffer drawIndecesBuffer;
+    protected ShortBuffer drawIndexesBuffer;
 
     public void onInit(int VWidth, int VHeight) {
         SIZE_WIDTH = VWidth;
         SIZE_HEIGHT = VHeight;
-        drawIndecesBuffer = GLHelper.getDrawIndecesBuffer();
+        drawIndexesBuffer = GLHelper.getDrawIndecesBuffer();
     }
 
-    public void onDraw(final int cameraTexture,final int targetFrameBuffer, final FloatBuffer shapeBuffer, final FloatBuffer textrueBuffer) {
+    public void onDraw(final int cameraTexture, final int targetFrameBuffer,
+                       final FloatBuffer shapeBuffer, final FloatBuffer textureBuffer) {
     }
 
     public void onDestroy() {
-
     }
 
     public void onDirectionUpdate(int _directionFlag) {

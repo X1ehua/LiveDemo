@@ -102,10 +102,10 @@ public class RESSoftVideoCore implements RESVideoCore {
     public boolean prepare(RESConfig resConfig) {
         synchronized (syncOp) {
             resCoreParameters.renderingMode = resConfig.getRenderingMode();
-            resCoreParameters.mediacdoecAVCBitRate = resConfig.getBitRate();
+            resCoreParameters.mediaCodecAVCBitRate = resConfig.getBitRate();
             resCoreParameters.videoBufferQueueNum = resConfig.getVideoBufferQueueNum();
-            resCoreParameters.mediacodecAVCIFrameInterval = resConfig.getVideoGOP();
-            resCoreParameters.mediacodecAVCFrameRate = resCoreParameters.videoFPS;
+            resCoreParameters.mediaCodecAVCIFrameInterval = resConfig.getVideoGOP();
+            resCoreParameters.mediaCodecAVCFrameRate = resCoreParameters.videoFPS;
             loopingInterval = 1000 / resCoreParameters.videoFPS;
             dstVideoFormat = new MediaFormat();
             synchronized (syncDstVideoEncoder) {
@@ -131,8 +131,8 @@ public class RESSoftVideoCore implements RESVideoCore {
                     BuffSizeCalculator.calculator(videoWidth, videoHeight, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar));
             filteredNV21VideoBuff = new RESVideoBuff(MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar,
                     BuffSizeCalculator.calculator(videoWidth, videoHeight, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar));
-            suitable4VideoEncoderBuff = new RESVideoBuff(resCoreParameters.mediacodecAVCColorFormat,
-                    BuffSizeCalculator.calculator(videoWidth, videoHeight, resCoreParameters.mediacodecAVCColorFormat));
+            suitable4VideoEncoderBuff = new RESVideoBuff(resCoreParameters.mediaCodecAVCColorFormat,
+                    BuffSizeCalculator.calculator(videoWidth, videoHeight, resCoreParameters.mediaCodecAVCColorFormat));
             videoFilterHandlerThread = new HandlerThread("videoFilterHandlerThread");
             videoFilterHandlerThread.start();
             videoFilterHandler = new VideoFilterHandler(videoFilterHandlerThread.getLooper());
@@ -211,12 +211,12 @@ public class RESSoftVideoCore implements RESVideoCore {
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
-    public void reSetVideoBitrate(int bitrate) {
+    public void setVideoBitRate(int bitrate) {
         synchronized (syncOp) {
             if (videoFilterHandler != null) {
                 videoFilterHandler.sendMessage(videoFilterHandler.obtainMessage(VideoFilterHandler.WHAT_RESET_BITRATE, bitrate, 0));
-                resCoreParameters.mediacdoecAVCBitRate = bitrate;
-                dstVideoFormat.setInteger(MediaFormat.KEY_BIT_RATE, resCoreParameters.mediacdoecAVCBitRate);
+                resCoreParameters.mediaCodecAVCBitRate = bitrate;
+                dstVideoFormat.setInteger(MediaFormat.KEY_BIT_RATE, resCoreParameters.mediaCodecAVCBitRate);
             }
         }
     }
@@ -225,12 +225,12 @@ public class RESSoftVideoCore implements RESVideoCore {
     @Override
     public int getVideoBitrate() {
         synchronized (syncOp) {
-            return resCoreParameters.mediacdoecAVCBitRate;
+            return resCoreParameters.mediaCodecAVCBitRate;
         }
     }
 
     @Override
-    public void reSetVideoFPS(int fps) {
+    public void setVideoFPS(int fps) {
         synchronized (syncOp) {
             resCoreParameters.videoFPS = fps;
             loopingInterval = 1000 / resCoreParameters.videoFPS;
@@ -425,10 +425,10 @@ public class RESSoftVideoCore implements RESVideoCore {
                          * orignNV21VideoBuff is ready
                          * orignNV21VideoBuff->suitable4VideoEncoderBuff
                          */
-                        if (resCoreParameters.mediacodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
+                        if (resCoreParameters.mediaCodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
                             ColorHelper.NV21TOYUV420SP(modified ? filteredNV21VideoBuff.buff : orignNV21VideoBuff.buff,
                                     suitable4VideoEncoderBuff.buff, resCoreParameters.videoWidth * resCoreParameters.videoHeight);
-                        } else if (resCoreParameters.mediacodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
+                        } else if (resCoreParameters.mediaCodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
                             ColorHelper.NV21TOYUV420P(modified ? filteredNV21VideoBuff.buff : orignNV21VideoBuff.buff,
                                     suitable4VideoEncoderBuff.buff, resCoreParameters.videoWidth * resCoreParameters.videoHeight);
                         } else {//LAKETODO colorConvert
@@ -436,11 +436,11 @@ public class RESSoftVideoCore implements RESVideoCore {
                     } else {
                         rendering(orignNV21VideoBuff.buff);
                         checkScreenShot(orignNV21VideoBuff.buff);
-                        if (resCoreParameters.mediacodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
+                        if (resCoreParameters.mediaCodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar) {
                             ColorHelper.NV21TOYUV420SP(orignNV21VideoBuff.buff,
                                     suitable4VideoEncoderBuff.buff,
                                     resCoreParameters.videoWidth * resCoreParameters.videoHeight);
-                        } else if (resCoreParameters.mediacodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
+                        } else if (resCoreParameters.mediaCodecAVCColorFormat == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar) {
                             ColorHelper.NV21TOYUV420P(orignNV21VideoBuff.buff,
                                     suitable4VideoEncoderBuff.buff,
                                     resCoreParameters.videoWidth * resCoreParameters.videoHeight);

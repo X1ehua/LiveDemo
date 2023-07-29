@@ -408,8 +408,8 @@ public class RESClient {
      * @param bitrate target bitrate bits/sec
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public void reSetVideoBitrate(int bitrate) {
-        videoClient.reSetVideoBitrate(bitrate);
+    public void setVideoBitRate(int bitrate) {
+        videoClient.setVideoBitRate(bitrate);
     }
 
     /**
@@ -424,8 +424,8 @@ public class RESClient {
      * update fps on the fly.
      * @param fps
      */
-    public void reSetVideoFPS(int fps) {
-        videoClient.reSetVideoFPS(fps);
+    public void setVideoFPS(int fps) {
+        videoClient.setVideoFPS(fps);
     }
 
     /**

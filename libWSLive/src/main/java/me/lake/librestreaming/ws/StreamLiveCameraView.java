@@ -1,6 +1,5 @@
 package me.lake.librestreaming.ws;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -9,6 +8,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,22 +28,18 @@ import me.lake.librestreaming.model.Size;
 import me.lake.librestreaming.tools.CameraUtil;
 import me.lake.librestreaming.ws.filter.audiofilter.SetVolumeAudioFilter;
 
-/**
- * Created by WangShuo on 2017/6/11.
- */
-
 public class StreamLiveCameraView extends FrameLayout {
+    private static final String TAG = "CCLive"; // "StreamLiveCameraView";
+//  private static int quality_value_min = 400 * 1024;
+//  private static int quality_value_max = 700 * 1024;
+    private static RESClient  mResClient;
+    private static RESConfig  mResConfig;
 
-    private static final String TAG = "StreamLiveCameraView";
-
-    private Context mContext;
-    private AspectTextureView textureView;
-    private final List<RESConnectionListener> outerStreamStateListeners = new ArrayList<>();
-
-    private static RESClient resClient;
-    private static RESConfig resConfig;
-    private static int quality_value_min = 400 * 1024;
-    private static int quality_value_max = 700 * 1024;
+    private MediaMuxerWrapper mMuxer;
+    private AspectTextureView mTextureView;
+    private Context           mContext;
+    private boolean           mIsRecording = false;
+    private final List<RESConnectionListener> mStreamStateListeners = new ArrayList<>();
 
     public StreamLiveCameraView(Context context) {
         super(context);
@@ -56,28 +52,24 @@ public class StreamLiveCameraView extends FrameLayout {
     }
 
     public static synchronized RESClient getRESClient() {
-        if (resClient == null) {
-            resClient = new RESClient();
+        if (mResClient == null) {
+            mResClient = new RESClient();
         }
-        return resClient;
+        return mResClient;
     }
 
-    /**
-     * 根据AVOption初始化&打开预览
-     *
-     * @param avOption
-     */
+    // 根据 AVOption 初始化 & 开始预览
     public void init(Context context, StreamAVOption avOption) {
         if (avOption == null) {
-            throw new IllegalArgumentException("AVOption is null.");
+            throw new IllegalArgumentException("AVOption is null");
         }
         compatibleSize(avOption);
-        resClient = getRESClient();
+        mResClient = getRESClient();
         setContext(mContext);
-        resConfig = StreamConfig.build(context, avOption);
-        boolean isSucceed = resClient.prepare(context, resConfig);
+        mResConfig = StreamConfig.build(context, avOption);
+        boolean isSucceed = mResClient.prepare(context, mResConfig);
         if (!isSucceed) {
-            Log.w(TAG, "推流prepare方法返回false, 状态异常.");
+            Log.w(TAG, "推流 prepare() false, 状态异常");
             return;
         }
         initPreviewTextureView();
@@ -98,231 +90,169 @@ public class StreamLiveCameraView extends FrameLayout {
     }
 
     private void initPreviewTextureView() {
-        if (textureView == null && resClient != null) {
-            textureView = new AspectTextureView(getContext());
+        if (mTextureView == null && mResClient != null) {
+            mTextureView = new AspectTextureView(getContext());
             LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             params.gravity = Gravity.CENTER;
             this.removeAllViews();
-            this.addView(textureView);
-            textureView.setKeepScreenOn(true);
-            textureView.setSurfaceTextureListener(surfaceTextureListenerImpl);
-            Size s = resClient.getVideoSize();
-            textureView.setAspectRatio(AspectTextureView.MODE_OUTSIDE, ((double) s.getWidth() / s.getHeight()));
+            this.addView(mTextureView);
+            mTextureView.setKeepScreenOn(true);
+            mTextureView.setSurfaceTextureListener(surfaceTextureListenerImpl);
+            Size s = mResClient.getVideoSize();
+            mTextureView.setAspectRatio(AspectTextureView.MODE_OUTSIDE, ((double) s.getWidth() / s.getHeight()));
         }
     }
 
     private void addListenerAndFilter() {
-        if (resClient != null) {
-            resClient.setConnectionListener(ConnectionListener);
-            resClient.setVideoChangeListener(VideoChangeListener);
-            resClient.setSoftAudioFilter(new SetVolumeAudioFilter());
+        if (mResClient != null) {
+            mResClient.setConnectionListener(ConnectionListener);
+            mResClient.setVideoChangeListener(VideoChangeListener);
+            mResClient.setSoftAudioFilter(new SetVolumeAudioFilter());
         }
     }
 
-    /**
-     * 是否推流
-     */
     public boolean isStreaming() {
-        if (resClient != null) {
-            return resClient.isStreaming;
+        if (mResClient != null) {
+            return mResClient.isStreaming;
         }
         return false;
     }
 
-    /**
-     * 开始推流
-     */
     public void startStreaming(String rtmpUrl) {
-        if (resClient != null) {
-            resClient.startStreaming(rtmpUrl);
+        if (mResClient != null && !isStreaming()) {
+            mResClient.startStreaming(rtmpUrl);
         }
     }
 
-    /**
-     * 停止推流
-     */
     public void stopStreaming() {
-        if (resClient != null) {
-            resClient.stopStreaming();
+        if (mResClient != null && isStreaming()) {
+            mResClient.stopStreaming();
         }
     }
-
-    /**
-     * 开始录制
-     */
-    private MediaMuxerWrapper mMuxer;
-    private boolean isRecord = false;
 
     public void startRecord() {
-        if (resClient != null) {
-            resClient.setNeedResetEglContext(true);
+        if (mResClient != null && !isRecording()) {
+            mResClient.setNeedResetEglContext(true);
             try {
-                mMuxer = new MediaMuxerWrapper(".mp4");    // if you record audio only, ".m4a" is also OK.
-                new MediaVideoEncoder(mMuxer, mMediaEncoderListener, StreamAVOption.recordVideoWidth, StreamAVOption.recordVideoHeight);
+                mMuxer = new MediaMuxerWrapper(".mp4"); // if you record audio only, ".m4a" is also OK.
                 new MediaAudioEncoder(mMuxer, mMediaEncoderListener);
-
+                new MediaVideoEncoder(mMuxer, mMediaEncoderListener,
+                                      StreamAVOption.recordVideoWidth, StreamAVOption.recordVideoHeight);
                 mMuxer.prepare();
                 mMuxer.startRecording();
-                isRecord = true;
+                mIsRecording = true;
+                Toast.makeText(mContext, "开始录制视频", Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
-                isRecord = false;
-                e.printStackTrace();
+                mIsRecording = false;
+                //e.printStackTrace();
+                Log.e(TAG, e.toString());
             }
         }
     }
 
-    /**
-     * 停止录制
-     */
     public String stopRecord() {
-        isRecord = false;
-        if (mMuxer != null) {
+        mIsRecording = false;
+        if (mMuxer != null && isRecording()) {
             String path = mMuxer.getFilePath();
             mMuxer.stopRecording();
             mMuxer = null;
             System.gc();
+            Toast.makeText(mContext, "视频已保存至 /sdcard/Movies/WSLive/", Toast.LENGTH_LONG).show();
             return path;
         }
         System.gc();
         return null;
     }
 
-    /**
-     * 是否在录制
-     */
-    public boolean isRecord() {
-        return isRecord;
+    public boolean isRecording() {
+        return mIsRecording;
     }
 
-    /**
-     * 切换摄像头
-     */
     public void swapCamera() {
-        if (resClient != null) {
-            resClient.swapCamera();
-            mZoom -= 0.1f;
-            //setZoomByPercent(mZoom);
+        if (mResClient != null) {
+            mResClient.swapCamera();
         }
     }
 
-    float mZoom = 1.0f;
-
-    /**
-     * 摄像头焦距 [0.0f,1.0f]
-     */
+    // 摄像头焦距 [0.0f, 1.0f]
     public void setZoomByPercent(float targetPercent) {
-        if (resClient != null) {
-            resClient.setZoomByPercent(targetPercent);
+        if (mResClient != null) {
+            mResClient.setZoomByPercent(targetPercent);
         }
     }
 
-    /**
-     * 摄像头开关闪光灯
-     */
     public void toggleFlashLight() {
-        if (resClient != null) {
-            resClient.toggleFlashLight();
+        if (mResClient != null) {
+            mResClient.toggleFlashLight();
         }
     }
 
-    /**
-     * 推流过程中，重新设置帧率
-     */
-    public void reSetVideoFPS(int fps) {
-        if (resClient != null) {
-            resClient.reSetVideoFPS(fps);
+    public void setVideoFPS(int fps) {
+        if (mResClient != null) {
+            mResClient.setVideoFPS(fps);
         }
     }
 
-    /**
-     * 推流过程中，重新设置码率
-     */
-    public void reSetVideoBitrate(int bitrate) {
-        if (resClient != null) {
-            resClient.reSetVideoBitrate(bitrate);
+    public void setVideoBitRate(int bitrate) {
+        if (mResClient != null) {
+            mResClient.setVideoBitRate(bitrate);
         }
     }
 
-    /**
-     * 截图
-     */
     public void takeScreenShot(RESScreenShotListener listener) {
-        if (resClient != null) {
-            resClient.takeScreenShot(listener);
+        if (mResClient != null) {
+            mResClient.takeScreenShot(listener);
         }
     }
 
     /**
-     * 镜像
-     *
-     * @param isEnableMirror        是否启用镜像功能 总开关
-     * @param isEnablePreviewMirror 是否开启预览镜像
-     * @param isEnableStreamMirror  是否开启推流镜像
+     * @param isEnableMirror        镜像功能总开关
+     * @param isEnablePreviewMirror 预览镜像
+     * @param isEnableStreamMirror  推流镜像
      */
     public void setMirror(boolean isEnableMirror, boolean isEnablePreviewMirror, boolean isEnableStreamMirror) {
-        if (resClient != null) {
-            resClient.setMirror(isEnableMirror, isEnablePreviewMirror, isEnableStreamMirror);
+        if (mResClient != null) {
+            mResClient.setMirror(isEnableMirror, isEnablePreviewMirror, isEnableStreamMirror);
         }
     }
 
-
-    /**
-     * 设置滤镜
-     */
     public void setHardVideoFilter(BaseHardVideoFilter baseHardVideoFilter) {
-        if (resClient != null) {
-            resClient.setHardVideoFilter(baseHardVideoFilter);
+        if (mResClient != null) {
+            mResClient.setHardVideoFilter(baseHardVideoFilter);
         }
     }
 
-    /**
-     * 获取BufferFreePercent
-     */
     public float getSendBufferFreePercent() {
-        return resClient.getSendBufferFreePercent();
+        return mResClient.getSendBufferFreePercent();
     }
 
-    /**
-     * AVSpeed 推流速度 和网络相关
-     */
     public int getAVSpeed() {
-        return resClient.getAVSpeed();
+        return mResClient.getAVSpeed();
     }
 
-    /**
-     * 设置上下文
-     */
     public void setContext(Context context) {
-        if (resClient != null) {
-            resClient.setContext(context);
+        if (mResClient != null) {
+            mResClient.setContext(context);
         }
     }
 
-    /**
-     * destroy
-     */
     public void destroy() {
-        if (resClient != null) {
-            resClient.setConnectionListener(null);
-            resClient.setVideoChangeListener(null);
-            if (resClient.isStreaming) {
-                resClient.stopStreaming();
+        if (mResClient != null) {
+            mResClient.setConnectionListener(null);
+            mResClient.setVideoChangeListener(null);
+            if (mResClient.isStreaming) {
+                mResClient.stopStreaming();
             }
-            if (isRecord()) {
+            if (mIsRecording) {
                 stopRecord();
             }
-            resClient.destroy();
+            mResClient.destroy();
         }
     }
 
-    /**
-     * 添加推流状态监听
-     *
-     * @param listener
-     */
     public void addStreamStateListener(RESConnectionListener listener) {
-        if (listener != null && !outerStreamStateListeners.contains(listener)) {
-            outerStreamStateListeners.add(listener);
+        if (listener != null && !mStreamStateListeners.contains(listener)) {
+            mStreamStateListeners.add(listener);
         }
     }
 
@@ -330,26 +260,24 @@ public class StreamLiveCameraView extends FrameLayout {
         @Override
         public void onOpenConnectionResult(int result) {
             if (result == 1) {
-                resClient.stopStreaming();
+                mResClient.stopStreaming();
             }
 
-            for (RESConnectionListener listener : outerStreamStateListeners) {
+            for (RESConnectionListener listener : mStreamStateListeners) {
                 listener.onOpenConnectionResult(result);
             }
         }
 
         @Override
         public void onWriteError(int errno) {
-
-            for (RESConnectionListener listener : outerStreamStateListeners) {
+            for (RESConnectionListener listener : mStreamStateListeners) {
                 listener.onWriteError(errno);
             }
         }
 
         @Override
         public void onCloseConnectionResult(int result) {
-
-            for (RESConnectionListener listener : outerStreamStateListeners) {
+            for (RESConnectionListener listener : mStreamStateListeners) {
                 listener.onCloseConnectionResult(result);
             }
         }
@@ -358,8 +286,8 @@ public class StreamLiveCameraView extends FrameLayout {
     RESVideoChangeListener VideoChangeListener = new RESVideoChangeListener() {
         @Override
         public void onVideoSizeChanged(int width, int height) {
-            if (textureView != null) {
-                textureView.setAspectRatio(AspectTextureView.MODE_INSIDE, ((double) width) / height);
+            if (mTextureView != null) {
+                mTextureView.setAspectRatio(AspectTextureView.MODE_INSIDE, ((double) width) / height);
             }
         }
     };
@@ -367,22 +295,22 @@ public class StreamLiveCameraView extends FrameLayout {
     TextureView.SurfaceTextureListener surfaceTextureListenerImpl = new TextureView.SurfaceTextureListener() {
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-            if (resClient != null) {
-                resClient.startPreview(surface, width, height);
+            if (mResClient != null) {
+                mResClient.startPreview(surface, width, height);
             }
         }
 
         @Override
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-            if (resClient != null) {
-                resClient.updatePreview(width, height);
+            if (mResClient != null) {
+                mResClient.updatePreview(width, height);
             }
         }
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-            if (resClient != null) {
-                resClient.stopPreview(true);
+            if (mResClient != null) {
+                mResClient.stopPreview(true);
             }
             return false;
         }
@@ -393,20 +321,18 @@ public class StreamLiveCameraView extends FrameLayout {
         }
     };
 
-    /**
-     * callback methods from encoder
-     */
+    // callback methods from encoder
     MediaEncoder.MediaEncoderListener mMediaEncoderListener = new MediaEncoder.MediaEncoderListener() {
         @Override
         public void onPrepared(final MediaEncoder encoder) {
-            if (encoder instanceof MediaVideoEncoder && resClient != null)
-                resClient.setVideoEncoder((MediaVideoEncoder) encoder);
+            if (encoder instanceof MediaVideoEncoder && mResClient != null)
+                mResClient.setVideoEncoder((MediaVideoEncoder) encoder);
         }
 
         @Override
         public void onStopped(final MediaEncoder encoder) {
-            if (encoder instanceof MediaVideoEncoder && resClient != null)
-                resClient.setVideoEncoder(null);
+            if (encoder instanceof MediaVideoEncoder && mResClient != null)
+                mResClient.setVideoEncoder(null);
         }
     };
 }

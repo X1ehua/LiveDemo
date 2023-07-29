@@ -20,64 +20,42 @@ import me.lake.librestreaming.ws.filter.hardfilter.extra.GPUImageCompatibleFilte
  */
 
 public class LiveUI implements View.OnClickListener {
+    private final LiveActivity         mLiveActivity;
+    private final StreamLiveCameraView mLiveCameraView;
+    private ImageView            mImageView;
+    private String               mRtmpUrl = "";
 
-    private LiveActivity activity;
-    private StreamLiveCameraView liveCameraView;
-    private String rtmpUrl = "";
+    /*
     boolean isFilter = false;
     boolean isMirror = false;
+    */
 
-    private Button btnStartStreaming;
-    private Button btnStopStreaming;
-    private Button btnStartRecord;
-    private Button btnStopRecord;
-    private Button btnFliter;
-    private Button btnSwapCamera;
-    private Button btnScreenshot;
-    private Button btnMirror;
-
-    private ImageView imageView;
-
-    public LiveUI(LiveActivity liveActivity, StreamLiveCameraView liveCameraView, String rtmpUrl) {
-        this.activity = liveActivity;
-        this.liveCameraView = liveCameraView;
-        this.rtmpUrl = rtmpUrl;
+    public LiveUI(LiveActivity liveActivity, StreamLiveCameraView liveCameraView, String mRtmpUrl) {
+        this.mLiveActivity = liveActivity;
+        this.mLiveCameraView = liveCameraView;
+        this.mRtmpUrl = mRtmpUrl;
 
         init();
-        liveCameraView.swapCamera();
+        //mLiveCameraView.swapCamera();
     }
 
     private void init() {
-        btnStartStreaming = (Button) activity.findViewById(R.id.btn_startStreaming);
-        btnStartStreaming.setOnClickListener(this);
+        int btnIds[] = {
+                R.id.btn_startStreaming,
+                R.id.btn_stopStreaming,
+                R.id.btn_swapCamera
+                //btn_startRecord, btn_stopRecord, btn_filter, btn_screenshot, btn_mirror
+        };
+        for (int id : btnIds) {
+            Button btn = (Button)mLiveActivity.findViewById(id);
+            btn.setOnClickListener(this);
+        }
 
-        btnStopStreaming = (Button) activity.findViewById(R.id.btn_stopStreaming);
-        btnStopStreaming.setOnClickListener(this);
-
-        //btnStartRecord = (Button) activity.findViewById(R.id.btn_startRecord);
-        //btnStartRecord.setOnClickListener(this);
-
-        //btnStopRecord = (Button) activity.findViewById(R.id.btn_stopRecord);
-        //btnStopRecord.setOnClickListener(this);
-
-        //btnFliter = (Button) activity.findViewById(R.id.btn_filter);
-        //btnFliter.setOnClickListener(this);
-
-        btnSwapCamera = (Button) activity.findViewById(R.id.btn_swapCamera);
-        btnSwapCamera.setOnClickListener(this);
-
-        //btnScreenshot = (Button) activity.findViewById(R.id.btn_screenshot);
-        //btnScreenshot.setOnClickListener(this);
-
-        //btnMirror = (Button) activity.findViewById(R.id.btn_mirror);
-        //btnMirror.setOnClickListener(this);
-        //btnMirror.setEnabled(false);
-
-        imageView = (ImageView) activity.findViewById(R.id.iv_image);
-        imageView.setOnClickListener(new View.OnClickListener() {
+        mImageView = (ImageView)mLiveActivity.findViewById(R.id.iv_image);
+        mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                imageView.setVisibility(View.GONE);
+                mImageView.setVisibility(View.GONE);
             }
         });
     }
@@ -85,34 +63,23 @@ public class LiveUI implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_startStreaming://开始推流
-                if (!liveCameraView.isStreaming()) {
-                    liveCameraView.startStreaming(rtmpUrl);
-                }
+            case R.id.btn_startStreaming: // 开始推流
+                mLiveCameraView.startStreaming(mRtmpUrl);
                 break;
-            case R.id.btn_stopStreaming://停止推流
-                if (liveCameraView.isStreaming()) {
-                    liveCameraView.stopStreaming();
-                }
+            case R.id.btn_stopStreaming: // 停止推流
+                mLiveCameraView.stopStreaming();
                 break;
-            case R.id.btn_swapCamera://切换摄像头
-                liveCameraView.swapCamera();
-                //activity.initCameraIds();
+            case R.id.btn_swapCamera: // 切换摄像头
+                mLiveCameraView.swapCamera();
                 break;
             /*
-            case R.id.btn_startRecord://开始录制
-                if (!liveCameraView.isRecord()) {
-                    Toast.makeText(activity, "开始录制视频", Toast.LENGTH_SHORT).show();
-                    liveCameraView.startRecord();
-                }
+            case R.id.btn_startRecord: // 开始录制
+                mLiveCameraView.startRecord();
                 break;
-            case R.id.btn_stopRecord://停止录制
-                if (liveCameraView.isRecord()) {
-                    liveCameraView.stopRecord();
-                    Toast.makeText(activity, "视频已成功保存至系统根目录的 Movies/WSLive文件夹中", Toast.LENGTH_LONG).show();
-                }
+            case R.id.btn_stopRecord: // 停止录制
+                mLiveCameraView.stopRecord();
                 break;
-            case R.id.btn_filter://切换滤镜
+            case R.id.btn_filter: // 切换滤镜
                 BaseHardVideoFilter baseHardVideoFilter = null;
                 if (isFilter) {
                     baseHardVideoFilter = new GPUImageCompatibleFilter(new GPUImageBeautyFilter());
@@ -120,28 +87,23 @@ public class LiveUI implements View.OnClickListener {
                     //baseHardVideoFilter = new FishEyeFilterHard();
                     baseHardVideoFilter = new GPUImageCompatibleFilter(new GPUImageFilter());
                 }
-                liveCameraView.setHardVideoFilter(baseHardVideoFilter);
+                mLiveCameraView.setHardVideoFilter(baseHardVideoFilter);
                 isFilter = !isFilter;
                 break;
-            case R.id.btn_screenshot://截帧
-                liveCameraView.takeScreenShot(new RESScreenShotListener() {
+            case R.id.btn_screenshot: // 截帧
+                mLiveCameraView.takeScreenShot(new RESScreenShotListener() {
                     @Override
                     public void onScreenShotResult(Bitmap bitmap) {
                         if (bitmap != null) {
-                            imageView.setVisibility(View.VISIBLE);
-                            imageView.setImageBitmap(bitmap);
+                            mImageView.setVisibility(View.VISIBLE);
+                            mImageView.setImageBitmap(bitmap);
                         }
-
                     }
                 });
                 break;
-            case R.id.btn_mirror://镜像
-                if (isMirror) {
-                    liveCameraView.setMirror(true, false, false);
-                } else {
-                    liveCameraView.setMirror(true, true, true);
-                }
+            case R.id.btn_mirror: // 镜像
                 isMirror = !isMirror;
+                mLiveCameraView.setMirror(true, isMirror, isMirror);
                 break;
             */
             default:

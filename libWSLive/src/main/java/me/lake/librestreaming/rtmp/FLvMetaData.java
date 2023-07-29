@@ -29,7 +29,7 @@ public class FLvMetaData {
         //Audio
         //AAC
         setProperty("audiocodecid", 10);
-        switch (coreParameters.mediacodecAACBitRate) {
+        switch (coreParameters.mediaCodecAACBitRate) {
             case 32 * 1024:
                 setProperty("audiodatarate", 32);
                 break;
@@ -41,7 +41,7 @@ public class FLvMetaData {
                 break;
         }
 
-        switch (coreParameters.mediacodecAACSampleRate) {
+        switch (coreParameters.mediaCodecAACSampleRate) {
             case 44100:
                 setProperty("audiosamplerate", 44100);
                 break;
@@ -51,7 +51,7 @@ public class FLvMetaData {
         //Video
         //h264
         setProperty("videocodecid", 7);
-        setProperty("framerate", coreParameters.mediacodecAVCFrameRate);
+        setProperty("framerate", coreParameters.mediaCodecAVCFrameRate);
         setProperty("width", coreParameters.videoWidth);
         setProperty("height", coreParameters.videoHeight);
     }

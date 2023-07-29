@@ -28,11 +28,11 @@ public interface RESVideoCore {
 
     boolean destroy();
 
-    void reSetVideoBitrate(int bitrate);
+    void setVideoBitRate(int bitrate);
 
     int getVideoBitrate();
 
-    void reSetVideoFPS(int fps);
+    void setVideoFPS(int fps);
 
     void reSetVideoSize(RESCoreParameters newParameters);
 

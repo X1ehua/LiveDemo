@@ -22,11 +22,11 @@ public class MediaMuxerWrapper {
 	private static final String DIR_NAME = "WSLive";
     private static final SimpleDateFormat mDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.US);
 
-	private String mOutputPath;
+	private String           mOutputPath;
 	private final MediaMuxer mMediaMuxer;	// API >= 18
-	private int mEncoderCount, mStatredCount;
-	private boolean mIsStarted;
-	private MediaEncoder mVideoEncoder, mAudioEncoder;
+	private int              mEncoderCount, mStartedCount;
+	private boolean          mIsStarted;
+	private MediaEncoder     mVideoEncoder, mAudioEncoder;
 
 	/**
 	 * Constructor
@@ -37,12 +37,11 @@ public class MediaMuxerWrapper {
 		if (TextUtils.isEmpty(ext)) ext = ".mp4";
 		try {
 			mOutputPath = getCaptureFile(Environment.DIRECTORY_MOVIES, ext).toString();
-			//mOutputPath =newTmpDir("Movies");/* getCaptureFile(Environment.DIRECTORY_MOVIES, ext).toString();*/
 		} catch (final NullPointerException e) {
 			throw new RuntimeException("This app has no permission of writing external storage");
 		}
 		mMediaMuxer = new MediaMuxer(mOutputPath, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-		mEncoderCount = mStatredCount = 0;
+		mEncoderCount = mStartedCount = 0;
 		mIsStarted = false;
 	}
 
@@ -53,9 +52,9 @@ public class MediaMuxerWrapper {
 	public static void setContext(Context context){
 		mContext = context;
 	}
+
 	/**
-	 * 新建tmp目录,tmp/xxx/
-	 *
+	 * 新建 tmp 目录, tmp/xxx/
 	 * @param dirName
 	 * @return
 	 */
@@ -68,12 +67,11 @@ public class MediaMuxerWrapper {
 		if (!dir.exists() || !dir.isDirectory()) {
 			dir.mkdirs();
 		}
-		return dir.getAbsolutePath()+getDateTimeString() + ".mp4";
+        return dir.getAbsolutePath() + getDateTimeString() + ".mp4";
 	}
 
 	/**
 	 * 获取缓存root路径
-	 *
 	 * @param context
 	 * @param isExternFirst 是否外存优先
 	 * @return
@@ -124,8 +122,7 @@ public class MediaMuxerWrapper {
 		return mIsStarted;
 	}
 
-//**********************************************************************
-//**********************************************************************
+    //**********************************************************************
 	/**
 	 * assign encoder to this calss. this is called from encoder.
 	 * @param encoder instance of MediaVideoEncoder or MediaAudioEncoder
@@ -149,28 +146,28 @@ public class MediaMuxerWrapper {
 	 * @return true when muxer is ready to write
 	 */
 	/*package*/ synchronized boolean start() {
-		if (DEBUG) Log.v(TAG,  "start:");
-		mStatredCount++;
-		if ((mEncoderCount > 0) && (mStatredCount == mEncoderCount)) {
+		if (DEBUG) Log.v(TAG, "start");
+		mStartedCount++;
+		if ((mEncoderCount > 0) && (mStartedCount == mEncoderCount)) {
 			mMediaMuxer.start();
 			mIsStarted = true;
 			notifyAll();
-			if (DEBUG) Log.v(TAG,  "MediaMuxer started:");
+			if (DEBUG) Log.v(TAG,  "MediaMuxer started");
 		}
 		return mIsStarted;
 	}
 
 	/**
 	 * request stop recording from encoder when encoder received EOS
-	*/
+	 */
 	/*package*/ synchronized void stop() {
-		if (DEBUG) Log.v(TAG,  "stop:mStatredCount=" + mStatredCount);
-		mStatredCount--;
-		if ((mEncoderCount > 0) && (mStatredCount <= 0)) {
+		if (DEBUG) Log.v(TAG, "stop: mStartedCount " + mStartedCount);
+		mStartedCount--;
+		if ((mEncoderCount > 0) && (mStartedCount <= 0)) {
 			mMediaMuxer.stop();
 			mMediaMuxer.release();
 			mIsStarted = false;
-			if (DEBUG) Log.v(TAG,  "MediaMuxer stopped:");
+			if (DEBUG) Log.v(TAG, "MediaMuxer stopped");
 		}
 	}
 
@@ -183,7 +180,8 @@ public class MediaMuxerWrapper {
 		if (mIsStarted)
 			throw new IllegalStateException("muxer already started");
 		final int trackIx = mMediaMuxer.addTrack(format);
-		if (DEBUG) Log.i(TAG, "addTrack:trackNum=" + mEncoderCount + ",trackIx=" + trackIx + ",format=" + format);
+		if (DEBUG)
+            Log.i(TAG, "addTrack: trackNum " + mEncoderCount + ", trackIx " + trackIx + ", format " + format);
 		return trackIx;
 	}
 
@@ -193,13 +191,13 @@ public class MediaMuxerWrapper {
 	 * @param byteBuf
 	 * @param bufferInfo
 	 */
-	/*package*/ synchronized void writeSampleData(final int trackIndex, final ByteBuffer byteBuf, final MediaCodec.BufferInfo bufferInfo) {
-		if (mStatredCount > 0)
+	/*package*/ synchronized void writeSampleData(final int trackIndex, final ByteBuffer byteBuf,
+                                                  final MediaCodec.BufferInfo bufferInfo) {
+		if (mStartedCount > 0)
 			mMediaMuxer.writeSampleData(trackIndex, byteBuf, bufferInfo);
 	}
 
-//**********************************************************************
-//**********************************************************************
+    //**********************************************************************
     /**
      * generate output file
      * @param type Environment.DIRECTORY_MOVIES / Environment.DIRECTORY_DCIM etc.
@@ -228,5 +226,4 @@ public class MediaMuxerWrapper {
     public String getFilePath(){
 		return mOutputPath;
 	}
-
 }

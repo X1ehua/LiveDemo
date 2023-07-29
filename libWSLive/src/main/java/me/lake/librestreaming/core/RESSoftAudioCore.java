@@ -51,7 +51,7 @@ public class RESSoftAudioCore {
         int targetIndex = (lastAudioQueueBuffIndex + 1) % orignAudioBuffs.length;
         if (orignAudioBuffs[targetIndex].isReadyToFill) {
             LogTools.d("queueAudio,accept ,targetIndex" + targetIndex);
-            System.arraycopy(rawAudioFrame, 0, orignAudioBuffs[targetIndex].buff, 0, resCoreParameters.audioRecoderBufferSize);
+            System.arraycopy(rawAudioFrame, 0, orignAudioBuffs[targetIndex].buff, 0, resCoreParameters.audioEncodeBufferSize);
             orignAudioBuffs[targetIndex].isReadyToFill = false;
             lastAudioQueueBuffIndex = targetIndex;
             audioFilterHandler.sendMessage(audioFilterHandler.obtainMessage(AudioFilterHandler.WHAT_INCOMING_BUFF, targetIndex, 0));
@@ -62,11 +62,11 @@ public class RESSoftAudioCore {
 
     public boolean prepare(RESConfig resConfig) {
         synchronized (syncOp) {
-            resCoreParameters.mediacodecAACProfile = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
-            resCoreParameters.mediacodecAACSampleRate = 44100;
-            resCoreParameters.mediacodecAACChannelCount = 1;
-            resCoreParameters.mediacodecAACBitRate = 32 * 1024;
-            resCoreParameters.mediacodecAACMaxInputSize = 8820;
+            resCoreParameters.mediaCodecAACProfile = MediaCodecInfo.CodecProfileLevel.AACObjectLC;
+            resCoreParameters.mediaCodecAACSampleRate = 44100;
+            resCoreParameters.mediaCodecAACChannelCount = 1;
+            resCoreParameters.mediaCodecAACBitRate = 32 * 1024;
+            resCoreParameters.mediaCodecAACMaxInputSize = 8820;
 
             dstAudioFormat = new MediaFormat();
             dstAudioEncoder = MediaCodecHelper.createAudioMediaCodec(resCoreParameters, dstAudioFormat);
@@ -77,7 +77,7 @@ public class RESSoftAudioCore {
             //audio
             //44100/10=4410,4410*2 = 8820
             int audioQueueNum = resCoreParameters.audioBufferQueueNum;
-            int orignAudioBuffSize = resCoreParameters.mediacodecAACSampleRate / 5;
+            int orignAudioBuffSize = resCoreParameters.mediaCodecAACSampleRate / 5;
             orignAudioBuffs = new RESAudioBuff[audioQueueNum];
             for (int i = 0; i < audioQueueNum; i++) {
                 orignAudioBuffs[i] = new RESAudioBuff(AudioFormat.ENCODING_PCM_16BIT, orignAudioBuffSize);
@@ -144,7 +144,7 @@ public class RESSoftAudioCore {
         }
         audioFilter = baseSoftAudioFilter;
         if (audioFilter != null) {
-            audioFilter.onInit(resCoreParameters.mediacodecAACSampleRate / 5);
+            audioFilter.onInit(resCoreParameters.mediaCodecAACSampleRate / 5);
         }
         lockAudioFilter.unlock();
     }

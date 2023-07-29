@@ -2,16 +2,13 @@ package me.lake.librestreaming.ws;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.TextureView;
-import android.view.View;
 
-
-public class AspectTextureView extends TextureView {
+public class AspectTextureView extends android.view.TextureView {
     public static final int MODE_FITXY = 0;
     public static final int MODE_INSIDE = 1;
     public static final int MODE_OUTSIDE = 2;
-    private double targetAspect = -1;
-    private int aspectMode = MODE_OUTSIDE;
+    private double mTargetAspect = -1;
+    private int    mAspectMode   = MODE_OUTSIDE;
 
     public AspectTextureView(Context context) {
         super(context);
@@ -36,37 +33,37 @@ public class AspectTextureView extends TextureView {
         if (aspectRatio < 0) {
             throw new IllegalArgumentException("illegal aspect ratio");
         }
-        if (targetAspect != aspectRatio || aspectMode != mode) {
-            targetAspect = aspectRatio;
-            aspectMode = mode;
+        if (mTargetAspect != aspectRatio || mAspectMode != mode) {
+            mTargetAspect = aspectRatio;
+            mAspectMode = mode;
             requestLayout();
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (targetAspect > 0) {
+        if (mTargetAspect > 0) {
             int initialWidth = MeasureSpec.getSize(widthMeasureSpec);
             int initialHeight = MeasureSpec.getSize(heightMeasureSpec);
 
             double viewAspectRatio = (double) initialWidth / initialHeight;
-            double aspectDiff = targetAspect / viewAspectRatio - 1;
+            double aspectDiff = mTargetAspect / viewAspectRatio - 1;
 
-            if (Math.abs(aspectDiff) > 0.01 && aspectMode != MODE_FITXY) {
-                if (aspectMode == MODE_INSIDE) {
+            if (Math.abs(aspectDiff) > 0.01 && mAspectMode != MODE_FITXY) {
+                if (mAspectMode == MODE_INSIDE) {
                     if (aspectDiff > 0) {
-                        initialHeight = (int) (initialWidth / targetAspect);
+                        initialHeight = (int) (initialWidth / mTargetAspect);
                     } else {
-                        initialWidth = (int) (initialHeight * targetAspect);
+                        initialWidth = (int) (initialHeight * mTargetAspect);
                     }
-                } else if (aspectMode == MODE_OUTSIDE) {
+                } else if (mAspectMode == MODE_OUTSIDE) {
                     if (aspectDiff > 0) {
-                        initialWidth = (int) (initialHeight * targetAspect);
+                        initialWidth = (int) (initialHeight * mTargetAspect);
                     } else {
-                        initialHeight = (int) (initialWidth / targetAspect);
+                        initialHeight = (int) (initialWidth / mTargetAspect);
                     }
                 }
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec(initialWidth, MeasureSpec.EXACTLY);
+                widthMeasureSpec  = MeasureSpec.makeMeasureSpec(initialWidth,  MeasureSpec.EXACTLY);
                 heightMeasureSpec = MeasureSpec.makeMeasureSpec(initialHeight, MeasureSpec.EXACTLY);
             }
         }
@@ -75,14 +72,14 @@ public class AspectTextureView extends TextureView {
 
     @Override
     public void layout(int l, int t, int r, int b) {
-        View p = (View) getParent();
-        if (p != null) {
-            int pw = p.getMeasuredWidth();
-            int ph = p.getMeasuredHeight();
+        android.view.View v = (android.view.View)getParent();
+        if (v != null) {
+            int mw = v.getMeasuredWidth();
+            int mh = v.getMeasuredHeight();
             int w = getMeasuredWidth();
             int h = getMeasuredHeight();
-            t = (ph - h) / 2;
-            l = (pw - w) / 2;
+            t = (mh - h) / 2;
+            l = (mw - w) / 2;
             r += l;
             b += t;
         }

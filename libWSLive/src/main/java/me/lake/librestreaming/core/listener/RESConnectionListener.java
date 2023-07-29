@@ -1,6 +1,5 @@
 package me.lake.librestreaming.core.listener;
 
-
 public interface RESConnectionListener {
     void onOpenConnectionResult(int result);
 

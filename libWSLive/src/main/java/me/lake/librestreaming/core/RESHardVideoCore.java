@@ -41,7 +41,6 @@ import me.lake.librestreaming.model.Size;
 import me.lake.librestreaming.rtmp.RESFlvDataCollecter;
 import me.lake.librestreaming.tools.LogTools;
 
-
 public class RESHardVideoCore implements RESVideoCore {
     RESCoreParameters resCoreParameters;
     private final Object syncOp = new Object();
@@ -52,7 +51,7 @@ public class RESHardVideoCore implements RESVideoCore {
     private MediaFormat dstVideoFormat;
     private final Object syncPreview = new Object();
     private HandlerThread videoGLHandlerThread;
-    private VideoGLHandler videoGLHander;
+    private VideoGLHandler videoGLHandler;
 
     final private Object syncResScreenShotListener = new Object();
     private RESScreenShotListener resScreenShotListener;
@@ -74,7 +73,7 @@ public class RESHardVideoCore implements RESVideoCore {
 
     public void onFrameAvailable() {
         if (videoGLHandlerThread != null) {
-            videoGLHander.addFrameNum();
+            videoGLHandler.addFrameNum();
         }
     }
 
@@ -82,16 +81,16 @@ public class RESHardVideoCore implements RESVideoCore {
     public boolean prepare(RESConfig resConfig) {
         synchronized (syncOp) {
             resCoreParameters.renderingMode = resConfig.getRenderingMode();
-            resCoreParameters.mediacdoecAVCBitRate = resConfig.getBitRate();
+            resCoreParameters.mediaCodecAVCBitRate = resConfig.getBitRate();
             resCoreParameters.videoBufferQueueNum = resConfig.getVideoBufferQueueNum();
-            resCoreParameters.mediacodecAVCIFrameInterval = resConfig.getVideoGOP();
-            resCoreParameters.mediacodecAVCFrameRate = resCoreParameters.videoFPS;
+            resCoreParameters.mediaCodecAVCIFrameInterval = resConfig.getVideoGOP();
+            resCoreParameters.mediaCodecAVCFrameRate = resCoreParameters.videoFPS;
             loopingInterval = 1000 / resCoreParameters.videoFPS;
             dstVideoFormat = new MediaFormat();
             videoGLHandlerThread = new HandlerThread("GLThread");
             videoGLHandlerThread.start();
-            videoGLHander = new VideoGLHandler(videoGLHandlerThread.getLooper());
-            videoGLHander.sendEmptyMessage(VideoGLHandler.WHAT_INIT);
+            videoGLHandler = new VideoGLHandler(videoGLHandlerThread.getLooper());
+            videoGLHandler.sendEmptyMessage(VideoGLHandler.WHAT_INIT);
             return true;
         }
     }
@@ -99,12 +98,12 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public void startPreview(SurfaceTexture surfaceTexture, int visualWidth, int visualHeight) {
         synchronized (syncOp) {
-            videoGLHander.sendMessage(videoGLHander.obtainMessage(VideoGLHandler.WHAT_START_PREVIEW,
+            videoGLHandler.sendMessage(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_START_PREVIEW,
                     visualWidth, visualHeight, surfaceTexture));
             synchronized (syncIsLooping) {
                 if (!isPreviewing && !isStreaming) {
-                    videoGLHander.removeMessages(VideoGLHandler.WHAT_DRAW);
-                    videoGLHander.sendMessageDelayed(videoGLHander.obtainMessage(VideoGLHandler.WHAT_DRAW, SystemClock.uptimeMillis() + loopingInterval), loopingInterval);
+                    videoGLHandler.removeMessages(VideoGLHandler.WHAT_DRAW);
+                    videoGLHandler.sendMessageDelayed(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_DRAW, SystemClock.uptimeMillis() + loopingInterval), loopingInterval);
                 }
                 isPreviewing = true;
             }
@@ -115,7 +114,7 @@ public class RESHardVideoCore implements RESVideoCore {
     public void updatePreview(int visualWidth, int visualHeight) {
         synchronized (syncOp) {
             synchronized (syncPreview) {
-                videoGLHander.updatePreview(visualWidth, visualHeight);
+                videoGLHandler.updatePreview(visualWidth, visualHeight);
             }
         }
     }
@@ -123,7 +122,7 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public void stopPreview(boolean releaseTexture) {
         synchronized (syncOp) {
-            videoGLHander.sendMessage(videoGLHander.obtainMessage(VideoGLHandler.WHAT_STOP_PREVIEW, releaseTexture));
+            videoGLHandler.sendMessage(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_STOP_PREVIEW, releaseTexture));
             synchronized (syncIsLooping) {
                 isPreviewing = false;
             }
@@ -133,11 +132,11 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public boolean startStreaming(RESFlvDataCollecter flvDataCollecter) {
         synchronized (syncOp) {
-            videoGLHander.sendMessage(videoGLHander.obtainMessage(VideoGLHandler.WHAT_START_STREAMING, flvDataCollecter));
+            videoGLHandler.sendMessage(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_START_STREAMING, flvDataCollecter));
             synchronized (syncIsLooping) {
                 if (!isPreviewing && !isStreaming) {
-                    videoGLHander.removeMessages(VideoGLHandler.WHAT_DRAW);
-                    videoGLHander.sendMessageDelayed(videoGLHander.obtainMessage(VideoGLHandler.WHAT_DRAW, SystemClock.uptimeMillis() + loopingInterval), loopingInterval);
+                    videoGLHandler.removeMessages(VideoGLHandler.WHAT_DRAW);
+                    videoGLHandler.sendMessageDelayed(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_DRAW, SystemClock.uptimeMillis() + loopingInterval), loopingInterval);
                 }
                 isStreaming = true;
             }
@@ -148,8 +147,8 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public void updateCamTexture(SurfaceTexture camTex) {
         synchronized (syncOp) {
-            if (videoGLHander != null) {
-                videoGLHander.updateCamTexture(camTex);
+            if (videoGLHandler != null) {
+                videoGLHandler.updateCamTexture(camTex);
             }
         }
     }
@@ -157,7 +156,7 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public boolean stopStreaming() {
         synchronized (syncOp) {
-            videoGLHander.sendEmptyMessage(VideoGLHandler.WHAT_STOP_STREAMING);
+            videoGLHandler.sendEmptyMessage(VideoGLHandler.WHAT_STOP_STREAMING);
             synchronized (syncIsLooping) {
                 isStreaming = false;
             }
@@ -168,26 +167,26 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public boolean destroy() {
         synchronized (syncOp) {
-            videoGLHander.sendEmptyMessage(VideoGLHandler.WHAT_UNINIT);
+            videoGLHandler.sendEmptyMessage(VideoGLHandler.WHAT_UNINIT);
             videoGLHandlerThread.quitSafely();
             try {
                 videoGLHandlerThread.join();
             } catch (InterruptedException ignored) {
             }
             videoGLHandlerThread = null;
-            videoGLHander = null;
+            videoGLHandler = null;
             return true;
         }
     }
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
-    public void reSetVideoBitrate(int bitrate) {
+    public void setVideoBitRate(int bitrate) {
         synchronized (syncOp) {
-            if (videoGLHander != null) {
-                videoGLHander.sendMessage(videoGLHander.obtainMessage(VideoGLHandler.WHAT_RESET_BITRATE, bitrate, 0));
-                resCoreParameters.mediacdoecAVCBitRate = bitrate;
-                dstVideoFormat.setInteger(MediaFormat.KEY_BIT_RATE, resCoreParameters.mediacdoecAVCBitRate);
+            if (videoGLHandler != null) {
+                videoGLHandler.sendMessage(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_RESET_BITRATE, bitrate, 0));
+                resCoreParameters.mediaCodecAVCBitRate = bitrate;
+                dstVideoFormat.setInteger(MediaFormat.KEY_BIT_RATE, resCoreParameters.mediaCodecAVCBitRate);
             }
         }
     }
@@ -196,12 +195,12 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public int getVideoBitrate() {
         synchronized (syncOp) {
-            return resCoreParameters.mediacdoecAVCBitRate;
+            return resCoreParameters.mediaCodecAVCBitRate;
         }
     }
 
     @Override
-    public void reSetVideoFPS(int fps) {
+    public void setVideoFPS(int fps) {
         synchronized (syncOp) {
             resCoreParameters.videoFPS = fps;
             loopingInterval = 1000 / resCoreParameters.videoFPS;
@@ -213,7 +212,7 @@ public class RESHardVideoCore implements RESVideoCore {
         synchronized (syncOp) {
             synchronized (syncIsLooping) {
                 if (isPreviewing || isStreaming) {
-                    videoGLHander.sendMessage(videoGLHander.obtainMessage(VideoGLHandler.WHAT_RESET_VIDEO, newParameters));
+                    videoGLHandler.sendMessage(videoGLHandler.obtainMessage(VideoGLHandler.WHAT_RESET_VIDEO, newParameters));
                 }
             }
         }
@@ -223,8 +222,8 @@ public class RESHardVideoCore implements RESVideoCore {
     public void setCurrentCamera(int cameraIndex) {
         mCameraId = cameraIndex;
         synchronized (syncOp) {
-            if (videoGLHander != null) {
-                videoGLHander.updateCameraIndex(cameraIndex);
+            if (videoGLHandler != null) {
+                videoGLHandler.updateCameraIndex(cameraIndex);
             }
         }
     }
@@ -269,7 +268,7 @@ public class RESHardVideoCore implements RESVideoCore {
     @Override
     public float getDrawFrameRate() {
         synchronized (syncOp) {
-            return videoGLHander == null ? 0 : videoGLHander.getDrawFrameRate();
+            return videoGLHandler == null ? 0 : videoGLHandler.getDrawFrameRate();
         }
     }
 
@@ -362,12 +361,12 @@ public class RESHardVideoCore implements RESVideoCore {
                     synchronized (syncIsLooping) {
                         if (isPreviewing || isStreaming) {
                             if (interval > 0) {
-                                videoGLHander.sendMessageDelayed(videoGLHander.obtainMessage(
+                                videoGLHandler.sendMessageDelayed(videoGLHandler.obtainMessage(
                                                 VideoGLHandler.WHAT_DRAW,
                                                 SystemClock.uptimeMillis() + interval),
                                         interval);
                             } else {
-                                videoGLHander.sendMessage(videoGLHander.obtainMessage(
+                                videoGLHandler.sendMessage(videoGLHandler.obtainMessage(
                                         VideoGLHandler.WHAT_DRAW,
                                         SystemClock.uptimeMillis() + loopingInterval));
                             }
@@ -841,7 +840,7 @@ public class RESHardVideoCore implements RESVideoCore {
                 if (mVideoEncoder != null) {
                     processStMatrix(textureMatrix, mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT);
                     if (mNeedResetEglContext) {
-                        mVideoEncoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
+                        mVideoEncoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHandler.getBufferTexture());
                         mNeedResetEglContext = false;
                     }
                     mVideoEncoder.setPreviewWH(resCoreParameters.previewVideoHeight, resCoreParameters.previewVideoWidth);
@@ -860,7 +859,7 @@ public class RESHardVideoCore implements RESVideoCore {
     public void setVideoEncoder(final MediaVideoEncoder encoder) {
         synchronized (this) {
             if (encoder != null) {
-                encoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHander.getBufferTexture());
+                encoder.setEglContext(EGL14.eglGetCurrentContext(), videoGLHandler.getBufferTexture());
             }
             mVideoEncoder = encoder;
         }
