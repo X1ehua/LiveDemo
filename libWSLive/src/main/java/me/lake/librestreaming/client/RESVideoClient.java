@@ -114,7 +114,7 @@ public class RESVideoClient {
             } else {
                 resCoreParameters.videoFPS = resConfig.getVideoFPS();
             }
-            resoveResolution(resCoreParameters, resConfig.getTargetVideoSize());
+            resolveResolution(resCoreParameters, resConfig.getTargetVideoSize());
             if (!CameraHelper.selectCameraColorFormat(parameters, resCoreParameters)) {
                 LogTools.e("CameraHelper.selectCameraColorFormat,Failed");
                 resCoreParameters.dump();
@@ -436,7 +436,7 @@ public class RESVideoClient {
             newParameters.filterMode = resCoreParameters.filterMode;
             Camera.Parameters parameters = camera.getParameters();
             CameraHelper.selectCameraPreviewWH(parameters, newParameters, targetVideoSize);
-            resoveResolution(newParameters, targetVideoSize);
+            resolveResolution(newParameters, targetVideoSize);
             boolean needRestartCamera = (newParameters.previewVideoHeight != resCoreParameters.previewVideoHeight
                     || newParameters.previewVideoWidth != resCoreParameters.previewVideoWidth);
             if (needRestartCamera) {
@@ -530,7 +530,7 @@ public class RESVideoClient {
         }
     }
 
-    private void resoveResolution(RESCoreParameters resCoreParameters, Size targetVideoSize) {
+    private void resolveResolution(RESCoreParameters resCoreParameters, Size targetVideoSize) {
         if (resCoreParameters.filterMode == RESCoreParameters.FILTER_MODE_SOFT) {
             if (resCoreParameters.isPortrait) {
                 resCoreParameters.videoHeight = resCoreParameters.previewVideoWidth;
@@ -551,6 +551,9 @@ public class RESVideoClient {
                 resCoreParameters.videoHeight = targetVideoSize.getHeight();
                 pw = resCoreParameters.previewVideoWidth;
                 ph = resCoreParameters.previewVideoHeight;
+                // reached, videoWidth&Height 640x360, previewWidth&Height 1280x720
+                resCoreParameters.videoWidth  /= 2;
+                resCoreParameters.videoHeight /= 2;
             }
             vw = resCoreParameters.videoWidth;
             vh = resCoreParameters.videoHeight;

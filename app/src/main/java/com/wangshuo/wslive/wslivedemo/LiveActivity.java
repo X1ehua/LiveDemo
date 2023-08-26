@@ -26,7 +26,7 @@ import me.lake.librestreaming.ws.filter.hardfilter.extra.GPUImageCompatibleFilte
 
 public class LiveActivity extends AppCompatActivity {
     private final static String  TAG = "CCLive";
-    private final static String  mRtmpUrl = "rtmp://mozicode.com:1935/wstv/home";
+    private final static String  mRtmpUrl = "rtmp://mozicode.com:2023/live/home";
     private StreamLiveCameraView mLiveCameraView;
     private StreamAVOption       mStreamAVOption;
     private LiveUI               mLiveUI;
