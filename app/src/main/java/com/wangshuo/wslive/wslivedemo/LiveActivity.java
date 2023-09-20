@@ -26,7 +26,8 @@ import me.lake.librestreaming.ws.filter.hardfilter.extra.GPUImageCompatibleFilte
 
 public class LiveActivity extends AppCompatActivity {
     private final static String  TAG = "CCLive";
-    private final static String  mRtmpUrl = "rtmp://mozicode.com:2023/live/home";
+//  private final static String  mRtmpUrl = "rtmp://mozicode.com:2023/live/home";
+    private final static String  mRtmpUrl = "rtmp://192.168.2.8:2023/live/home";
     private StreamLiveCameraView mLiveCameraView;
     private StreamAVOption       mStreamAVOption;
     private LiveUI               mLiveUI;
@@ -63,7 +64,7 @@ public class LiveActivity extends AppCompatActivity {
     RESConnectionListener mConnectionListener = new RESConnectionListener() {
         @Override
         public void onOpenConnectionResult(int result) { // 0: success, 1: failed
-            String msg = result == 0 ? "Streaming started" : "Start streaming failed";
+            String msg = result == 0 ? "Streaming started:\n" + mRtmpUrl : "Start streaming failed";
             Toast.makeText(LiveActivity.this, msg, Toast.LENGTH_LONG).show();
         }
 

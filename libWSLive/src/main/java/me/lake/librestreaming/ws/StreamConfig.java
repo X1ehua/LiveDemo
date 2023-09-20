@@ -12,16 +12,16 @@ import static me.lake.librestreaming.ws.StreamConfig.AVOptionsHolder.DEFAULT_REN
 
 public class StreamConfig {
     public static class AVOptionsHolder {
-        public static final int DEFAULT_CAMERA_INDEX = Camera.CameraInfo.CAMERA_FACING_BACK;
-        public static final int DEFAULT_FILTER_MODE = RESConfig.FilterMode.HARD;
-        public static final int DEFAULT_RENDER_MODE = RESConfig.RenderingMode.OpenGLES;
-        public static final int DEFAULT_PREVIEW_WIDTH = 1280;
-        public static final int DEFAULT_PREVIEW_HEIGHT = 720;
-        public static final int DEFAULT_VIDEO_WIDTH = 640;
-        public static final int DEFAULT_VIDEO_HEIGHT = 360;
-        public static final int DEFAULT_VIDEO_BITRATE = 600 * 1024;
-        public static final int DEFAULT_VIDEO_FPS = 20;
-        public static final int DEFAULT_VIDEO_GOP = 2;
+        public static final int DEFAULT_CAMERA_INDEX    = Camera.CameraInfo.CAMERA_FACING_BACK;
+        public static final int DEFAULT_FILTER_MODE     = RESConfig.FilterMode.HARD;
+        public static final int DEFAULT_RENDER_MODE     = RESConfig.RenderingMode.OpenGLES;
+        public static final int DEFAULT_PREVIEW_WIDTH   = 1280;
+        public static final int DEFAULT_PREVIEW_HEIGHT  = 720;
+        public static final int DEFAULT_VIDEO_WIDTH     = 1280;
+        public static final int DEFAULT_VIDEO_HEIGHT    = 720;
+        public static final int DEFAULT_VIDEO_BITRATE   = 1024 * 1024; // 600 * 1024
+        public static final int DEFAULT_VIDEO_FPS       = 24;
+        public static final int DEFAULT_VIDEO_GOP       = 2;
     }
 
     public static RESConfig build(Context context, StreamAVOption option) {

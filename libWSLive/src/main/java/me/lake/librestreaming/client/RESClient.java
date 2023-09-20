@@ -62,17 +62,17 @@ public class RESClient {
             coreParameters.filterMode = resConfig.getFilterMode();
             coreParameters.rtmpAddr = resConfig.getRtmpAddr();
             coreParameters.printDetailMsg = resConfig.isPrintDetailMsg();
-            coreParameters.senderQueueLength = 200;//150
+            coreParameters.senderQueueLength = 200; // 150
             videoClient = new RESVideoClient(context, coreParameters);
             audioClient = new RESAudioClient(coreParameters);
             if (!videoClient.prepare(resConfig)) {
-                LogTools.d("!!!!!videoClient.prepare()failed");
-                LogTools.d(coreParameters.toString());
+                LogTools.e("videoClient.prepare() failed");
+                LogTools.e(coreParameters.toString());
                 return false;
             }
             if (!audioClient.prepare(resConfig)) {
-                LogTools.d("!!!!!audioClient.prepare()failed");
-                LogTools.d(coreParameters.toString());
+                LogTools.e("audioClient.prepare() failed");
+                LogTools.e(coreParameters.toString());
                 return false;
             }
             rtmpSender = new RESRtmpSender();
@@ -86,7 +86,7 @@ public class RESClient {
                 }
             };
             coreParameters.done = true;
-            LogTools.d("===INFO===coreParametersReady:");
+            LogTools.d(">> coreParameters prepared: ");
             LogTools.d(coreParameters.toString());
             return true;
         }

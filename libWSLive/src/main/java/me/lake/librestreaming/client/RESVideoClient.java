@@ -539,7 +539,7 @@ public class RESVideoClient {
                 resCoreParameters.videoWidth = resCoreParameters.previewVideoWidth;
                 resCoreParameters.videoHeight = resCoreParameters.previewVideoHeight;
             }
-        } else {
+        } else { // reached
             float pw, ph, vw, vh;
             if (resCoreParameters.isPortrait) {
                 resCoreParameters.videoHeight = targetVideoSize.getWidth();
@@ -552,8 +552,8 @@ public class RESVideoClient {
                 pw = resCoreParameters.previewVideoWidth;
                 ph = resCoreParameters.previewVideoHeight;
                 // reached, videoWidth&Height 640x360, previewWidth&Height 1280x720
-                resCoreParameters.videoWidth  /= 2;
-                resCoreParameters.videoHeight /= 2;
+                resCoreParameters.videoWidth  /= 1;
+                resCoreParameters.videoHeight /= 1;
             }
             vw = resCoreParameters.videoWidth;
             vh = resCoreParameters.videoHeight;

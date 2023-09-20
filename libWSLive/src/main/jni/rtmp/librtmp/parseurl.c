@@ -146,7 +146,7 @@ parsehost:
 	if(slash3)
 		slash4 = strchr(slash3+1, '/');
 
-	applen = end-p; /* ondemand, pass all parameters as app */
+	applen = end - p; /* ondemand, pass all parameters as app */
 	appnamelen = applen; /* ondemand length */
 
 	if(ques && strstr(p, "slist=")) { /* whatever it is, the '?' and slist= means we need to use everything as app and parse plapath from slist= */
@@ -178,8 +178,9 @@ parsehost:
 	if (*p == '/')
 		p++;
 
-	if (end-p) {
-		AVal av = {p, end-p};
+	RTMP_Log(RTMP_LOGERROR, ">>> RTMP_ParseURL() end - p %d", (int)(end - p)); // not reached
+	if (end - p) {
+		AVal av = {p, end - p};
 		RTMP_ParsePlaypath(&av, playpath);
 	}
 
@@ -224,11 +225,13 @@ void RTMP_ParsePlaypath(AVal *in, AVal *out) {
 	}
 
 	q = strchr(ppstart, '?');
+	RTMP_Log(RTMP_LOGERROR, ">>> RTMP_ParsePlayPath() pplen %d", pplen); // not reached
 	if (pplen >= 4) {
 		if (q)
 			ext = q-4;
 		else
 			ext = &ppstart[pplen-4];
+		RTMP_Log(RTMP_LOGERROR, ">>> RTMP_ParsePlayPath() ext %s", ext);
 		if ((strncmp(ext, ".f4v", 4) == 0) ||
 		    (strncmp(ext, ".mp4", 4) == 0)) {
 			addMP4 = 1;

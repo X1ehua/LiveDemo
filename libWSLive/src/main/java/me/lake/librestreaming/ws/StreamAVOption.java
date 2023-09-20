@@ -9,7 +9,7 @@ public class StreamAVOption {
     public int videoBitRate = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_BITRATE;//比特率
     public int videoFrameRate = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_FPS;//帧率
     public int videoGOP = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_GOP;//gop 关键帧间隔
-    public String streamUrl = "rtmp://mozicode.com:2023/live/home";
+    public String streamUrl = ""; // not used
 
     // TODO: better value?
     public static int recordVideoWidth = 544/4; //录制的视频宽

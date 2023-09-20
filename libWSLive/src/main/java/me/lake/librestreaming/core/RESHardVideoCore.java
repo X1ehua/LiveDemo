@@ -285,10 +285,10 @@ public class RESHardVideoCore implements RESVideoCore {
         static final int WHAT_RESET_BITRATE = 0x300;
         private Size screenSize;
         //=========================
-        public static final int FILTER_LOCK_TOLERATION = 3;//3ms
+        public static final int FILTER_LOCK_TOLERATION = 3; // ms
         private final Object syncFrameNum = new Object();
         private int frameNum = 0;
-        //gl stuff
+        // GL stuff
         private final Object syncCameraTex = new Object();
         private SurfaceTexture cameraTexture;
 
@@ -309,11 +309,11 @@ public class RESHardVideoCore implements RESVideoCore {
         private final Object syncCameraTextureVerticesBuffer = new Object();
         private FloatBuffer camera2dTextureVerticesBuffer;
         private FloatBuffer cameraTextureVerticesBuffer;
-        private ShortBuffer drawIndecesBuffer;
+        private ShortBuffer drawIndicesBuffer;
         private BaseHardVideoFilter innerVideoFilter = null;
         private RESFrameRateMeter drawFrameRateMeter;
         private int directionFlag;
-        //sender
+        // sender
         private VideoSenderThread videoSenderThread;
 
         boolean hasNewFrame = false;
@@ -611,7 +611,7 @@ public class RESHardVideoCore implements RESVideoCore {
         private void doGLDraw() {
             GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawIndecesBuffer.limit(), GLES20.GL_UNSIGNED_SHORT, drawIndecesBuffer);
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawIndicesBuffer.limit(), GLES20.GL_UNSIGNED_SHORT, drawIndicesBuffer);
         }
 
         /**
@@ -788,7 +788,7 @@ public class RESHardVideoCore implements RESVideoCore {
             mediaCodecTextureVerticesBuffer = GLHelper.getMediaCodecTextureVerticesBuffer();
             screenTextureVerticesBuffer = GLHelper.getScreenTextureVerticesBuffer();
             updateCameraIndex(currCamera);
-            drawIndecesBuffer = GLHelper.getDrawIndecesBuffer();
+            drawIndicesBuffer = GLHelper.getDrawIndecesBuffer();
             cameraTextureVerticesBuffer = GLHelper.getCameraTextureVerticesBuffer();
         }
 
