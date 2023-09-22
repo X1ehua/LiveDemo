@@ -64,8 +64,8 @@ public class LiveActivity extends AppCompatActivity {
     RESConnectionListener mConnectionListener = new RESConnectionListener() {
         @Override
         public void onOpenConnectionResult(int result) { // 0: success, 1: failed
-            String msg = result == 0 ? "Streaming started:\n" + mRtmpUrl : "Start streaming failed";
-            Toast.makeText(LiveActivity.this, msg, Toast.LENGTH_LONG).show();
+            String msg = result == 0 ? "Streaming started:\n" : "Start streaming failed:\n";
+            Toast.makeText(LiveActivity.this, msg + mRtmpUrl, Toast.LENGTH_LONG).show();
         }
 
         @Override

@@ -162,8 +162,8 @@ public class RESRtmpSender {
                     sendFrameRateMeter.reSet();
                     LogTools.d("RESRtmpSender,WorkHandler,tid=" + Thread.currentThread().getId());
                     jniRtmpPointer = RtmpClient.open((String) msg.obj, true);
-                    final int openR = jniRtmpPointer == 0 ? 1 : 0;
-                    if (openR == 0) {
+                    final int openResult = jniRtmpPointer == 0 ? 1 : 0;
+                    if (openResult == 0) {
                         serverIpAddr = RtmpClient.getIpAddr(jniRtmpPointer);
                     }
                     synchronized (syncConnectionListener) {
@@ -171,7 +171,7 @@ public class RESRtmpSender {
                             CallbackDelivery.i().post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    connectionListener.onOpenConnectionResult(openR);
+                                    connectionListener.onOpenConnectionResult(openResult);
                                 }
                             });
                         }

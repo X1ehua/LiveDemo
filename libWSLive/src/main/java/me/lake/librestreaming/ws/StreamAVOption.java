@@ -9,11 +9,11 @@ public class StreamAVOption {
     public int videoBitRate = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_BITRATE;//比特率
     public int videoFrameRate = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_FPS;//帧率
     public int videoGOP = StreamConfig.AVOptionsHolder.DEFAULT_VIDEO_GOP;//gop 关键帧间隔
-    public String streamUrl = ""; // not used
+    public String streamUrl = "";
 
     // TODO: better value?
-    public static int recordVideoWidth = 544/4; //录制的视频宽
-    public static int recordVideoHeight = 960/4; //录制的视频高
+    public static int recordVideoWidth = 540; //录制的视频宽
+    public static int recordVideoHeight = 960; //录制的视频高
 
     public StreamAVOption(String url) {
         this.streamUrl = url;
